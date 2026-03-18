@@ -13,13 +13,17 @@ const router = createRouter({
     },
     {
       path: '/',
-      redirect: '/home'
+      redirect: '/dashboard'
     },
     {
       path: '/',
       component: () => import('../layout/Layout.vue'),
-      redirect: '/home',
+      redirect: '/dashboard',
       children: [
+        {
+          path: '/dashboard',
+          component: () => import('../views/dashboard/Index.vue')
+        },
         {
           path: '/home',
           component: () => import('../views/HomeView.vue')
@@ -45,7 +49,7 @@ router.beforeEach((to, from, next) => {
     ElMessage.warning('请先登录')
     next('/login')
   } else if (hasLogin && to.path === '/login') {
-    next('/home')
+    next('/dashboard')
   } else {
     next()
   }

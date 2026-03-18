@@ -5,12 +5,12 @@
         <el-input v-model="queryParams.title" placeholder="请输入作品标题" clearable />
       </el-form-item>
       <el-form-item label="所属分类">
-        <el-select v-model="queryParams.categoryId" placeholder="请选择分类" clearable>
+        <el-select v-model="queryParams.categoryId" placeholder="请选择分类" style="width: 160px" clearable>
           <el-option v-for="item in categoryList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-form-item label="状态">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+        <el-select v-model="queryParams.status" placeholder="请选择状态" style="width: 160px"  clearable>
           <el-option label="待审核" :value="0" />
           <el-option label="已发布" :value="1" />
         </el-select>
@@ -38,10 +38,10 @@
           <el-button link type="primary" size="small" @click="showDetail(scope.row)">
             详情
           </el-button>
-          <el-button link type="success" size="small" @click="handleApprove(scope.row)">
+          <el-button v-if="scope.row.status === 0" link type="success" size="small" @click="handleAudit(scope.row, 1)">
             通过
           </el-button>
-          <el-button link type="danger" size="small" @click="handleOffline(scope.row)">
+          <el-button v-if="scope.row.status === 1" link type="danger" size="small" @click="handleAudit(scope.row, 0)">
             下架
           </el-button>
         </template>
@@ -80,7 +80,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/api/request'
 
 const tableData = ref([])
@@ -143,12 +143,38 @@ const showDetail = (row) => {
   detailVisible.value = true
 }
 
-const handleApprove = (row) => {
-  console.log('审核通过', row)
-}
+const handleAudit = (row, targetStatus) => {
+  const action = targetStatus === 1 ? '通过' : '下架'
+  const message = targetStatus === 1
+    ? `确定要通过作品《${row.title}》的审核吗？`
+    : `确定要强制下架作品《${row.title}》吗？`
 
-const handleOffline = (row) => {
-  console.log('下架作品', row)
+  ElMessageBox.confirm(message, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    try {
+      // ✅ 修复点：第二个参数传 null（清空Body），第三个参数用 params 把数据拼接到 URL 上
+      // ✅ 修复点：参数名严格改为 targetStatus，与后端保持 100% 一致
+      const res = await request.put('/artwork/admin/audit', null, {
+        params: {
+          id: row.id,
+          targetStatus: targetStatus
+        }
+      })
+      
+      if (res.code === 200 || res.success === true) {
+        ElMessage.success(`${action}成功`)
+        loadData() // 重新加载表格，状态标签会瞬间变色！
+      } else {
+        ElMessage.error(res.message || `${action}失败`)
+      }
+    } catch (error) {
+      console.error(`${action}失败:`, error)
+      ElMessage.error(error.response?.data?.message || `${action}失败`)
+    }
+  }).catch(() => {})
 }
 
 onMounted(() => {
