@@ -27,6 +27,10 @@ const router = createRouter({
         {
           path: '/category',
           component: () => import('../views/category/Category.vue')
+        },
+        {
+          path: '/artwork',
+          component: () => import('../views/artwork/Artwork.vue')
         }
       ]
     }

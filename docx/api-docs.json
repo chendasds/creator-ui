@@ -1,0 +1,1937 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "个人创作记录与作品分享平台 - 接口文档",
+    "description": "包含用户、作品、评论、标签等核心业务接口的在线调试页面",
+    "contact": {
+      "name": "Creation Platform",
+      "email": "support@creation-platform.com"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:45757",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/user": {
+      "put": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "updateById",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "save",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tag": {
+      "put": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "updateById_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Tag"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "save_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Tag"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creation-record": {
+      "put": {
+        "tags": [
+          "creation-record-controller"
+        ],
+        "operationId": "updateById_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreationRecord"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "creation-record-controller"
+        ],
+        "operationId": "save_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreationRecord"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/comment": {
+      "put": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "updateById_3",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "save_3",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/category": {
+      "put": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "updateById_4",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "save_4",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artwork": {
+      "put": {
+        "tags": [
+          "artwork-controller"
+        ],
+        "operationId": "updateById_5",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Artwork"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "artwork-controller"
+        ],
+        "operationId": "save_5",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Artwork"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artwork/view/{id}": {
+      "put": {
+        "tags": [
+          "artwork-controller"
+        ],
+        "operationId": "incrementViewCount",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/register": {
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/login": {
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/interaction": {
+      "post": {
+        "tags": [
+          "user-interaction-controller"
+        ],
+        "operationId": "interact",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInteraction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user-interaction-controller"
+        ],
+        "operationId": "cancelInteraction",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInteraction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artwork-tag/artwork/{artworkId}": {
+      "get": {
+        "tags": [
+          "artwork-tag-relation-controller"
+        ],
+        "operationId": "getTagsByArtworkId",
+        "parameters": [
+          {
+            "name": "artworkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "artwork-tag-relation-controller"
+        ],
+        "operationId": "setTags",
+        "parameters": [
+          {
+            "name": "artworkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/{id}": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "getById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "removeById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/list": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "list",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tag/{id}": {
+      "get": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "getById_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tag"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "removeById_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tag/page": {
+      "get": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "page",
+        "parameters": [
+          {
+            "name": "current",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageTag"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tag/list": {
+      "get": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "list_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Tag"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/interaction/check": {
+      "get": {
+        "tags": [
+          "user-interaction-controller"
+        ],
+        "operationId": "check",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "artworkId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "interactionType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creation-record/{id}": {
+      "get": {
+        "tags": [
+          "creation-record-controller"
+        ],
+        "operationId": "getById_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationRecord"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "creation-record-controller"
+        ],
+        "operationId": "removeById_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creation-record/user/{userId}": {
+      "get": {
+        "tags": [
+          "creation-record-controller"
+        ],
+        "operationId": "listByUserId",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreationRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creation-record/list": {
+      "get": {
+        "tags": [
+          "creation-record-controller"
+        ],
+        "operationId": "list_2",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreationRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/comment/{id}": {
+      "get": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "getById_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "removeById_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/comment/replies/{parentId}": {
+      "get": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "getReplies",
+        "parameters": [
+          {
+            "name": "parentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Comment"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/comment/artwork/{artworkId}": {
+      "get": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "getCommentsByArtworkId",
+        "parameters": [
+          {
+            "name": "artworkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/category/{id}": {
+      "get": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "getById_4",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "removeById_4",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/category/page": {
+      "get": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "page_1",
+        "parameters": [
+          {
+            "name": "current",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageCategory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/category/list": {
+      "get": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "list_3",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artwork/{id}": {
+      "get": {
+        "tags": [
+          "artwork-controller"
+        ],
+        "operationId": "getById_5",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Artwork"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "artwork-controller"
+        ],
+        "operationId": "removeById_5",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artwork/page": {
+      "get": {
+        "tags": [
+          "artwork-controller"
+        ],
+        "operationId": "page_2",
+        "parameters": [
+          {
+            "name": "current",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageArtwork"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artwork/list": {
+      "get": {
+        "tags": [
+          "artwork-controller"
+        ],
+        "operationId": "list_4",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Artwork"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artwork-tag/list": {
+      "get": {
+        "tags": [
+          "artwork-tag-relation-controller"
+        ],
+        "operationId": "list_5",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ArtworkTagRelation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "username": {
+            "type": "string",
+            "refType": null
+          },
+          "password": {
+            "type": "string",
+            "refType": null
+          },
+          "nickname": {
+            "type": "string",
+            "refType": null
+          },
+          "avatarUrl": {
+            "type": "string",
+            "refType": null
+          },
+          "email": {
+            "type": "string",
+            "refType": null
+          },
+          "role": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time",
+            "refType": null
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "refType": null
+          },
+          "isDeleted": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          }
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDeleted": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CreationRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "description": {
+            "type": "string"
+          },
+          "wordCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDeleted": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "artworkId": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "parentId": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "content": {
+            "type": "string",
+            "refType": null
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time",
+            "refType": null
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "refType": null
+          },
+          "isDeleted": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "name": {
+            "type": "string",
+            "refType": null
+          },
+          "description": {
+            "type": "string",
+            "refType": null
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time",
+            "refType": null
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "refType": null
+          },
+          "isDeleted": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          }
+        }
+      },
+      "Artwork": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "title": {
+            "type": "string",
+            "refType": null
+          },
+          "content": {
+            "type": "string",
+            "refType": null
+          },
+          "coverUrl": {
+            "type": "string",
+            "refType": null
+          },
+          "description": {
+            "type": "string",
+            "refType": null
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "aiSummary": {
+            "type": "string",
+            "refType": null
+          },
+          "viewCount": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          },
+          "wordCount": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time",
+            "refType": null
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "refType": null
+          },
+          "isDeleted": {
+            "type": "integer",
+            "format": "int32",
+            "refType": null
+          }
+        }
+      },
+      "UserInteraction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "artworkId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "interactionType": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDeleted": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "column": {
+            "type": "string",
+            "refType": null
+          },
+          "asc": {
+            "type": "boolean",
+            "refType": null
+          }
+        }
+      },
+      "PageTag": {
+        "type": "object",
+        "properties": {
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "current": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "orders": {
+            "type": "array",
+            "writeOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "optimizeCountSql": {
+            "$ref": "#/components/schemas/PageTag"
+          },
+          "searchCount": {
+            "$ref": "#/components/schemas/PageTag"
+          },
+          "optimizeJoinOfCountSql": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "maxLimit": {
+            "type": "integer",
+            "format": "int64",
+            "writeOnly": true
+          },
+          "countId": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64",
+            "deprecated": true
+          }
+        }
+      },
+      "PageCategory": {
+        "type": "object",
+        "properties": {
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            },
+            "refType": "Category"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "current": {
+            "type": "integer",
+            "format": "int64",
+            "refType": null
+          },
+          "orders": {
+            "type": "array",
+            "writeOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            },
+            "refType": "OrderItem"
+          },
+          "optimizeCountSql": {
+            "$ref": "#/components/schemas/PageCategory",
+            "refType": "PageCategory"
+          },
+          "searchCount": {
+            "$ref": "#/components/schemas/PageCategory",
+            "refType": "PageCategory"
+          },
+          "optimizeJoinOfCountSql": {
+            "type": "boolean",
+            "writeOnly": true,
+            "refType": null
+          },
+          "maxLimit": {
+            "type": "integer",
+            "format": "int64",
+            "writeOnly": true,
+            "refType": null
+          },
+          "countId": {
+            "type": "string",
+            "writeOnly": true,
+            "refType": null
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64",
+            "deprecated": true,
+            "refType": null
+          }
+        }
+      },
+      "PageArtwork": {
+        "type": "object",
+        "properties": {
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Artwork"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "current": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "orders": {
+            "type": "array",
+            "writeOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "optimizeCountSql": {
+            "$ref": "#/components/schemas/PageArtwork"
+          },
+          "searchCount": {
+            "$ref": "#/components/schemas/PageArtwork"
+          },
+          "optimizeJoinOfCountSql": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "maxLimit": {
+            "type": "integer",
+            "format": "int64",
+            "writeOnly": true
+          },
+          "countId": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64",
+            "deprecated": true
+          }
+        }
+      },
+      "ArtworkTagRelation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "artworkId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tagId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDeleted": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    }
+  }
+}

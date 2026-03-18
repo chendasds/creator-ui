@@ -12,6 +12,9 @@
         <el-menu-item index="/category">
           <span>分类管理</span>
         </el-menu-item>
+        <el-menu-item index="/artwork">
+          <span>作品管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>
