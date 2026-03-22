@@ -152,11 +152,24 @@ const handleLogin = async () => {
         console.log('登录响应:', res)
 
         const userInfo = res.data?.user || res.user
-        if (res.success) {
+        // 【核心修复点 1】：提取后端返回的 token（兼容两种常见的数据结构）
+        const token = res.data?.token || res.token
+
+        if (res.success || res.code === 200 || res.code === 0) {
           ElMessage.success(res.message || '登录成功')
+          
           if (userInfo) {
             localStorage.setItem('user', JSON.stringify(userInfo))
           }
+          
+          // 【核心修复点 2】：把 token 妥妥地存进 localStorage
+          if (token) {
+            localStorage.setItem('token', token)
+          } else {
+            // 防御性编程：如果后端压根没传 token，在控制台报警
+            console.warn('⚠️ 警告：后端返回的数据中没有找到 token 字段！请检查后端接口。')
+          }
+          
           router.push('/home')
         } else {
           ElMessage.error(res.message || '登录失败')

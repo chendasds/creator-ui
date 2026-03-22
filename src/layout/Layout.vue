@@ -6,13 +6,13 @@
         router
         class="layout-menu"
       >
-        <el-menu-item index="/dashboard">
+        <el-menu-item index="/admin/dashboard">
           <span>首页</span>
         </el-menu-item>
-        <el-menu-item index="/category">
+        <el-menu-item index="/admin/category">
           <span>分类管理</span>
         </el-menu-item>
-        <el-menu-item index="/artwork">
+        <el-menu-item index="/admin/artwork">
           <span>作品管理</span>
         </el-menu-item>
       </el-menu>
