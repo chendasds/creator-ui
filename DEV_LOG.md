@@ -70,4 +70,38 @@
   - Option 中用内联 `:style` 渲染 `# 标签名` 彩色文字，与首页标签云风格一致
   - 引入 `onMounted` 并在组件挂载时调用标签接口
 - **修改的文件**：`src/views/Publish.vue`
-- **遗留问题/下一步**：提交时需将 `tagIds` 字段一起发送给 `/artwork/publish`
+- **遗留问题/下一步**：首页信息流展示文章关联的标签列表
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：首页信息流卡片内标签渲染升级（`modern-tag-small` 极简风格）
+- **核心技术点**：
+  - 标签渲染位置在 footer 上方，v-if 判断 `item.tags && item.tags.length`
+  - key 改为 `tag.id`，旧 `:key="tag.name || tag"` 写法已淘汰
+  - `@click.stop="handleTagClick(tag.id)"` 阻止冒泡，点击标签跳转筛选
+  - `.modern-tag-small`：4px 微圆角、极简浅灰底、hover 字体变色
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端 `/artwork/feed` 需返回每篇文章的 tags 数组
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：发布页下拉框 UI 简化 + `tagIds` 完整打通提交链路
+- **核心技术点**：
+  - Option 内容区还原为默认简洁展示，不再使用内联 span 样式
+  - `handleSubmit` 请求体显式补入 `tagIds: form.tagIds`，确保多选标签完整提交
+- **修改的文件**：`src/views/Publish.vue`
+- **遗留问题/下一步**：首页信息流展示文章关联的标签列表
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：首页信息流卡片内标签渲染升级（`modern-tag-small` 极简风格）
+- **核心技术点**：
+  - 标签渲染位置在 footer 上方，v-if 判断 `item.tags && item.tags.length`
+  - key 改为 `tag.id`，旧 `:key="tag.name || tag"` 写法已淘汰
+  - `@click.stop="handleTagClick(tag.id)"` 阻止冒泡，点击标签跳转筛选
+  - `.modern-tag-small`：4px 微圆角、极简浅灰底、hover 字体变色
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端 `/artwork/feed` 需返回每篇文章的 tags 数组

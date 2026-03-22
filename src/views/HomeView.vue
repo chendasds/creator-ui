@@ -29,17 +29,17 @@
                     <span class="time">{{ item.createTime ? item.createTime.split('T')[0] : '刚刚' }}</span>
                   </div>
                   <p class="article-summary">{{ item.description }}</p>
-                  <!-- 文章标签 -->
-                  <div v-if="item.tags && item.tags.length > 0" class="article-tags">
+                  <div class="article-tags" v-if="item.tags && item.tags.length" style="margin-bottom: 12px; display: flex; gap: 8px;">
                     <el-tag
                       v-for="tag in item.tags"
-                      :key="tag.name || tag"
+                      :key="tag.id"
+                      class="modern-tag-small"
+                      :style="{ '--hover-color': tag.color || '#409eff' }"
+                      disable-transitions
                       size="small"
-                      :style="getTagStyle(tag)"
-                      effect="plain"
-                      round
+                      @click.stop="handleTagClick(tag.id)"
                     >
-                      {{ tag.name || tag }}
+                      {{ tag.name }}
                     </el-tag>
                   </div>
                   <div class="article-footer">
@@ -407,11 +407,18 @@ const fetchTags = async () => {
   margin-bottom: 12px;
 }
 
-.article-tags :deep(.el-tag) {
-  padding: 0 10px;
-  height: 24px;
-  line-height: 22px;
-  font-size: 12px;
+.modern-tag-small {
+  background-color: #f4f5f5 !important;
+  color: #515767 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.modern-tag-small:hover {
+  color: var(--hover-color) !important;
+  background-color: #e8eaec !important;
 }
 
 .article-footer {

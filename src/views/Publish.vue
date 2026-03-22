@@ -51,9 +51,7 @@
               :key="tag.id"
               :label="tag.name"
               :value="tag.id"
-            >
-              <span :style="{ color: tag.color || '#606266', fontWeight: 'bold' }"># {{ tag.name }}</span>
-            </el-option>
+            />
           </el-select>
         </el-form-item>
 
@@ -263,6 +261,7 @@ const handleSubmit = async (status) => {
       const res = await request.post('/artwork/publish', {
         title: form.title,
         categoryId: form.categoryId,
+        tagIds: form.tagIds,
         coverUrl: form.coverUrl,
         description: form.description || plainText.slice(0, 200),
         content: form.content,
