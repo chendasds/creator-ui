@@ -37,6 +37,28 @@
         </span>
       </div>
 
+      <!-- 字数与阅读时长 -->
+      <div class="meta-info" style="color: #8a919f; font-size: 14px; margin: 15px 0; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <span>{{ artwork.authorName }}</span>
+        <span>{{ artwork.createTime ? artwork.createTime.split('T')[0] : '' }}</span>
+        <span>阅读 {{ artwork.viewCount || 0 }}</span>
+        <span>全篇约 {{ artwork.wordCount || 0 }} 字，预计阅读 {{ Math.ceil((artwork.wordCount || 0) / 400) || 1 }} 分钟</span>
+      </div>
+
+      <!-- 标签云 -->
+      <div class="detail-tags" v-if="artwork.tags && artwork.tags.length" style="margin-bottom: 25px; display: flex; gap: 8px;">
+        <el-tag
+          v-for="tag in artwork.tags"
+          :key="tag.id"
+          size="small"
+          class="modern-tag-detail"
+          :style="{ '--hover-color': tag.color || '#409eff' }"
+          @click="goToHomeWithTag(tag.id)"
+        >
+          # {{ tag.name }}
+        </el-tag>
+      </div>
+
       <el-divider />
 
       <!-- 正文内容 -->
@@ -454,6 +476,10 @@ const formatDate = (dateStr) => {
   return `${year}-${month}-${day}`
 }
 
+const goToHomeWithTag = (tagId) => {
+  router.push({ path: '/', query: { tagId: tagId } })
+}
+
 onMounted(() => {
   fetchDetail()
   fetchComments()
@@ -528,6 +554,21 @@ onMounted(() => {
 :deep(.el-divider) {
   margin: 24px 0;
   border-color: #f0f2f5;
+}
+
+/* 标签云 */
+.modern-tag-detail {
+  background-color: #f4f5f5 !important;
+  color: #515767 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.modern-tag-detail:hover {
+  color: var(--hover-color) !important;
+  background-color: #e8eaec !important;
 }
 
 /* 正文内容 */

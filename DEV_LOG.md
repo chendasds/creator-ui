@@ -87,6 +87,211 @@
 ---
 
 - **日期**：2026-03-21
+- **完成功能**：作品详情页增加阅读时长预测与标签云
+- **核心技术点**：
+  - `Math.ceil((artwork.wordCount || 0) / 400) || 1` 实时计算阅读分钟数
+  - `goToHomeWithTag(tagId)` 跳回首页并带上 `?tagId=` query 参数
+  - `.modern-tag-detail` 极简灰底 + hover 字体变专属色，与首页标签云风格统一
+- **修改的文件**：`src/views/ArtworkDetail.vue`
+- **遗留问题/下一步**：后端 `/artwork/detail/{id}` 需返回 tags 数组
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：发布页封面上传升级为本地图片上传组件
+- **核心技术点**：
+  - `el-upload` + `:http-request="customUpload"` 完全接管上传行为，不走默认 POST
+  - `FormData` 携带文件，`/file/upload` 接口返回图片 URL 直接写入 `form.coverUrl`
+  - 预览与上传合一：有图时直接覆盖显示，无图时展示 Plus 图标占位
+  - `:show-file-list="false"` 关闭默认文件列表提示，体验更简洁
+- **修改的文件**：`src/views/Publish.vue`
+- **遗留问题/下一步**：后端 `/file/upload` 需支持 `multipart/form-data` 并返回图片 URL
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：新增分类广场页面，打通顶栏「分类」导航路由
+- **核心技术点**：
+  - 新建 `CategoryView.vue`，网格布局展示分类卡片，点击卡片跳转首页并带 `?categoryId=`
+  - FrontLayout 中 `handleNavClick('category')` 改为 `router.push('/category')`
+  - `/category` 路由挂载在 FrontLayout 子路由下，与 `/home`、`/artwork/:id` 同级
+- **修改的文件**：`src/views/CategoryView.vue`（新建）、`src/layout/FrontLayout.vue`、`src/router/index.js`
+- **遗留问题/下一步**：首页需支持从 URL query 读取 `categoryId` 并激活分类筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：首页支持解析 `categoryId` 并联动文章筛选
+- **核心技术点**：
+  - `activeCategoryId` 状态与 `activeTagId` 并列，`fetchArticles` params 中同时携带两者
+  - onMounted 中 `route.query.categoryId` → `Number` → `activeCategoryId.value`
+  - 分类提示条绿色背景高亮，"查看全部"调用 `clearCategory()` 清空并重拉
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端 `/artwork/feed` 需支持 `categoryId` 参数筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：创作中心卡片接入后端 `/user/stats` 真实数据
+- **核心技术点**：
+  - `statsData`（reactive）替换为 `userStats`（ref），字段名对齐后端：`articleCount`、`totalViews`、`totalLikes`、`fanCount`
+  - `fetchUserStats` 在无 token 时直接 return，兼容未登录态不报错
+  - `onMounted` 中追加 `fetchUserStats()` 调用
+  - 清理无用的 `reactive` import
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/user/stats` 接口
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：优化首页右侧创作中心卡片，移除冗余头部，改造按钮
+- **核心技术点**：
+  - 删除 `<template #header>` 头部（"创作中心" + 用户图标），卡片内容更紧凑
+  - "写文章"按钮改为 "进入创作中心"，跳转 `/creator` 占位路由
+  - 新增 `.creator-btn` 样式，`width: 100%`、`margin-top: 16px`
+  - 清理残留的孤立 `.write-btn {` 空块，避免 CSS 解析错误
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：实现 `/creator` 创作中心路由页面
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：修复首页筛选状态下点击"首页"无法回到全部列表的 Bug
+- **核心技术点**：
+  - `watch(() => route.query, ...)` 监听整个 query 对象，同组件跳转时也能响应
+  - FrontLayout 首页改为 `@click="$router.push('/')"` 强制回根路径，确保 URL 无参数残留
+- **修改的文件**：`src/views/HomeView.vue`（新增 watch）、`src/layout/FrontLayout.vue`（首页导航改造）
+- **遗留问题/下一步**：后端 `/artwork/feed` 需支持 `categoryId` 参数筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：创作中心卡片接入后端 `/user/stats` 真实数据
+- **核心技术点**：
+  - `statsData`（reactive）替换为 `userStats`（ref），字段名对齐后端：`articleCount`、`totalViews`、`totalLikes`、`fanCount`
+  - `fetchUserStats` 在无 token 时直接 return，兼容未登录态不报错
+  - `onMounted` 中追加 `fetchUserStats()` 调用
+  - 清理无用的 `reactive` import
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/user/stats` 接口
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：优化首页右侧创作中心卡片，移除冗余头部，改造按钮
+- **核心技术点**：
+  - 删除 `<template #header>` 头部（"创作中心" + 用户图标），卡片内容更紧凑
+  - "写文章"按钮改为 "进入创作中心"，跳转 `/creator` 占位路由
+  - 新增 `.creator-btn` 样式，`width: 100%`、`margin-top: 16px`
+  - 清理残留的孤立 `.write-btn {` 空块，避免 CSS 解析错误
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：实现 `/creator` 创作中心路由页面
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：首页从 URL query 读取 tagId 并自动激活标签筛选
+- **核心技术点**：
+  - `useRoute()` 获取 URL 参数，`Number(route.query.tagId)` 转数值后赋给 `activeTagId.value`
+  - onMounted 中先设置 `activeTagId`，再调用 `fetchArticles()`，筛选逻辑自动生效
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端 `/artwork/detail/{id}` 需返回 tags 数组
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：发布页封面上传升级为本地图片上传组件
+- **核心技术点**：
+  - `el-upload` + `:http-request="customUpload"` 完全接管上传行为，不走默认 POST
+  - `FormData` 携带文件，`/file/upload` 接口返回图片 URL 直接写入 `form.coverUrl`
+  - 预览与上传合一：有图时直接覆盖显示，无图时展示 Plus 图标占位
+  - `:show-file-list="false"` 关闭默认文件列表提示，体验更简洁
+- **修改的文件**：`src/views/Publish.vue`
+- **遗留问题/下一步**：后端 `/file/upload` 需支持 `multipart/form-data` 并返回图片 URL
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：新增分类广场页面，打通顶栏「分类」导航路由
+- **核心技术点**：
+  - 新建 `CategoryView.vue`，网格布局展示分类卡片，点击卡片跳转首页并带 `?categoryId=`
+  - FrontLayout 中 `handleNavClick('category')` 改为 `router.push('/category')`
+  - `/category` 路由挂载在 FrontLayout 子路由下，与 `/home`、`/artwork/:id` 同级
+- **修改的文件**：`src/views/CategoryView.vue`（新建）、`src/layout/FrontLayout.vue`、`src/router/index.js`
+- **遗留问题/下一步**：首页需支持从 URL query 读取 `categoryId` 并激活分类筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：首页支持解析 `categoryId` 并联动文章筛选
+- **核心技术点**：
+  - `activeCategoryId` 状态与 `activeTagId` 并列，`fetchArticles` params 中同时携带两者
+  - onMounted 中 `route.query.categoryId` → `Number` → `activeCategoryId.value`
+  - 分类提示条绿色背景高亮，"查看全部"调用 `clearCategory()` 清空并重拉
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端 `/artwork/feed` 需支持 `categoryId` 参数筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：创作中心卡片接入后端 `/user/stats` 真实数据
+- **核心技术点**：
+  - `statsData`（reactive）替换为 `userStats`（ref），字段名对齐后端：`articleCount`、`totalViews`、`totalLikes`、`fanCount`
+  - `fetchUserStats` 在无 token 时直接 return，兼容未登录态不报错
+  - `onMounted` 中追加 `fetchUserStats()` 调用
+  - 清理无用的 `reactive` import
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/user/stats` 接口
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：优化首页右侧创作中心卡片，移除冗余头部，改造按钮
+- **核心技术点**：
+  - 删除 `<template #header>` 头部（"创作中心" + 用户图标），卡片内容更紧凑
+  - "写文章"按钮改为 "进入创作中心"，跳转 `/creator` 占位路由
+  - 新增 `.creator-btn` 样式，`width: 100%`、`margin-top: 16px`
+  - 清理残留的孤立 `.write-btn {` 空块，避免 CSS 解析错误
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：实现 `/creator` 创作中心路由页面
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：修复首页筛选状态下点击"首页"无法回到全部列表的 Bug
+- **核心技术点**：
+  - `watch(() => route.query, ...)` 监听整个 query 对象，同组件跳转时也能响应
+  - FrontLayout 首页改为 `@click="$router.push('/')"` 强制回根路径，确保 URL 无参数残留
+- **修改的文件**：`src/views/HomeView.vue`（新增 watch）、`src/layout/FrontLayout.vue`（首页导航改造）
+- **遗留问题/下一步**：后端 `/artwork/feed` 需支持 `categoryId` 参数筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：创作中心卡片接入后端 `/user/stats` 真实数据
+- **核心技术点**：
+  - `statsData`（reactive）替换为 `userStats`（ref），字段名对齐后端：`articleCount`、`totalViews`、`totalLikes`、`fanCount`
+  - `fetchUserStats` 在无 token 时直接 return，兼容未登录态不报错
+  - `onMounted` 中追加 `fetchUserStats()` 调用
+  - 清理无用的 `reactive` import
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/user/stats` 接口
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：优化首页右侧创作中心卡片，移除冗余头部，改造按钮
+- **核心技术点**：
+  - 删除 `<template #header>` 头部（"创作中心" + 用户图标），卡片内容更紧凑
+  - "写文章"按钮改为 "进入创作中心"，跳转 `/creator` 占位路由
+  - 新增 `.creator-btn` 样式，`width: 100%`、`margin-top: 16px`
+  - 清理残留的孤立 `.write-btn {` 空块，避免 CSS 解析错误
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：实现 `/creator` 创作中心路由页面
+
+---
+
+- **日期**：2026-03-21
 - **完成功能**：发布页下拉框 UI 简化 + `tagIds` 完整打通提交链路
 - **核心技术点**：
   - Option 内容区还原为默认简洁展示，不再使用内联 span 样式
@@ -105,3 +310,208 @@
   - `.modern-tag-small`：4px 微圆角、极简浅灰底、hover 字体变色
 - **修改的文件**：`src/views/HomeView.vue`
 - **遗留问题/下一步**：后端 `/artwork/feed` 需返回每篇文章的 tags 数组
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：作品详情页增加阅读时长预测与标签云
+- **核心技术点**：
+  - `Math.ceil((artwork.wordCount || 0) / 400) || 1` 实时计算阅读分钟数
+  - `goToHomeWithTag(tagId)` 跳回首页并带上 `?tagId=` query 参数
+  - `.modern-tag-detail` 极简灰底 + hover 字体变专属色，与首页标签云风格统一
+- **修改的文件**：`src/views/ArtworkDetail.vue`
+- **遗留问题/下一步**：后端 `/artwork/detail/{id}` 需返回 tags 数组
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：发布页封面上传升级为本地图片上传组件
+- **核心技术点**：
+  - `el-upload` + `:http-request="customUpload"` 完全接管上传行为，不走默认 POST
+  - `FormData` 携带文件，`/file/upload` 接口返回图片 URL 直接写入 `form.coverUrl`
+  - 预览与上传合一：有图时直接覆盖显示，无图时展示 Plus 图标占位
+  - `:show-file-list="false"` 关闭默认文件列表提示，体验更简洁
+- **修改的文件**：`src/views/Publish.vue`
+- **遗留问题/下一步**：后端 `/file/upload` 需支持 `multipart/form-data` 并返回图片 URL
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：新增分类广场页面，打通顶栏「分类」导航路由
+- **核心技术点**：
+  - 新建 `CategoryView.vue`，网格布局展示分类卡片，点击卡片跳转首页并带 `?categoryId=`
+  - FrontLayout 中 `handleNavClick('category')` 改为 `router.push('/category')`
+  - `/category` 路由挂载在 FrontLayout 子路由下，与 `/home`、`/artwork/:id` 同级
+- **修改的文件**：`src/views/CategoryView.vue`（新建）、`src/layout/FrontLayout.vue`、`src/router/index.js`
+- **遗留问题/下一步**：首页需支持从 URL query 读取 `categoryId` 并激活分类筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：首页支持解析 `categoryId` 并联动文章筛选
+- **核心技术点**：
+  - `activeCategoryId` 状态与 `activeTagId` 并列，`fetchArticles` params 中同时携带两者
+  - onMounted 中 `route.query.categoryId` → `Number` → `activeCategoryId.value`
+  - 分类提示条绿色背景高亮，"查看全部"调用 `clearCategory()` 清空并重拉
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端 `/artwork/feed` 需支持 `categoryId` 参数筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：创作中心卡片接入后端 `/user/stats` 真实数据
+- **核心技术点**：
+  - `statsData`（reactive）替换为 `userStats`（ref），字段名对齐后端：`articleCount`、`totalViews`、`totalLikes`、`fanCount`
+  - `fetchUserStats` 在无 token 时直接 return，兼容未登录态不报错
+  - `onMounted` 中追加 `fetchUserStats()` 调用
+  - 清理无用的 `reactive` import
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/user/stats` 接口
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：优化首页右侧创作中心卡片，移除冗余头部，改造按钮
+- **核心技术点**：
+  - 删除 `<template #header>` 头部（"创作中心" + 用户图标），卡片内容更紧凑
+  - "写文章"按钮改为 "进入创作中心"，跳转 `/creator` 占位路由
+  - 新增 `.creator-btn` 样式，`width: 100%`、`margin-top: 16px`
+  - 清理残留的孤立 `.write-btn {` 空块，避免 CSS 解析错误
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：实现 `/creator` 创作中心路由页面
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：修复首页筛选状态下点击"首页"无法回到全部列表的 Bug
+- **核心技术点**：
+  - `watch(() => route.query, ...)` 监听整个 query 对象，同组件跳转时也能响应
+  - FrontLayout 首页改为 `@click="$router.push('/')"` 强制回根路径，确保 URL 无参数残留
+- **修改的文件**：`src/views/HomeView.vue`（新增 watch）、`src/layout/FrontLayout.vue`（首页导航改造）
+- **遗留问题/下一步**：后端 `/artwork/feed` 需支持 `categoryId` 参数筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：创作中心卡片接入后端 `/user/stats` 真实数据
+- **核心技术点**：
+  - `statsData`（reactive）替换为 `userStats`（ref），字段名对齐后端：`articleCount`、`totalViews`、`totalLikes`、`fanCount`
+  - `fetchUserStats` 在无 token 时直接 return，兼容未登录态不报错
+  - `onMounted` 中追加 `fetchUserStats()` 调用
+  - 清理无用的 `reactive` import
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/user/stats` 接口
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：优化首页右侧创作中心卡片，移除冗余头部，改造按钮
+- **核心技术点**：
+  - 删除 `<template #header>` 头部（"创作中心" + 用户图标），卡片内容更紧凑
+  - "写文章"按钮改为 "进入创作中心"，跳转 `/creator` 占位路由
+  - 新增 `.creator-btn` 样式，`width: 100%`、`margin-top: 16px`
+  - 清理残留的孤立 `.write-btn {` 空块，避免 CSS 解析错误
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：实现 `/creator` 创作中心路由页面
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：首页从 URL query 读取 tagId 并自动激活标签筛选
+- **核心技术点**：
+  - `useRoute()` 获取 URL 参数，`Number(route.query.tagId)` 转数值后赋给 `activeTagId.value`
+  - onMounted 中先设置 `activeTagId`，再调用 `fetchArticles()`，筛选逻辑自动生效
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端 `/artwork/detail/{id}` 需返回 tags 数组
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：发布页封面上传升级为本地图片上传组件
+- **核心技术点**：
+  - `el-upload` + `:http-request="customUpload"` 完全接管上传行为，不走默认 POST
+  - `FormData` 携带文件，`/file/upload` 接口返回图片 URL 直接写入 `form.coverUrl`
+  - 预览与上传合一：有图时直接覆盖显示，无图时展示 Plus 图标占位
+  - `:show-file-list="false"` 关闭默认文件列表提示，体验更简洁
+- **修改的文件**：`src/views/Publish.vue`
+- **遗留问题/下一步**：后端 `/file/upload` 需支持 `multipart/form-data` 并返回图片 URL
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：新增分类广场页面，打通顶栏「分类」导航路由
+- **核心技术点**：
+  - 新建 `CategoryView.vue`，网格布局展示分类卡片，点击卡片跳转首页并带 `?categoryId=`
+  - FrontLayout 中 `handleNavClick('category')` 改为 `router.push('/category')`
+  - `/category` 路由挂载在 FrontLayout 子路由下，与 `/home`、`/artwork/:id` 同级
+- **修改的文件**：`src/views/CategoryView.vue`（新建）、`src/layout/FrontLayout.vue`、`src/router/index.js`
+- **遗留问题/下一步**：首页需支持从 URL query 读取 `categoryId` 并激活分类筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：首页支持解析 `categoryId` 并联动文章筛选
+- **核心技术点**：
+  - `activeCategoryId` 状态与 `activeTagId` 并列，`fetchArticles` params 中同时携带两者
+  - onMounted 中 `route.query.categoryId` → `Number` → `activeCategoryId.value`
+  - 分类提示条绿色背景高亮，"查看全部"调用 `clearCategory()` 清空并重拉
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端 `/artwork/feed` 需支持 `categoryId` 参数筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：创作中心卡片接入后端 `/user/stats` 真实数据
+- **核心技术点**：
+  - `statsData`（reactive）替换为 `userStats`（ref），字段名对齐后端：`articleCount`、`totalViews`、`totalLikes`、`fanCount`
+  - `fetchUserStats` 在无 token 时直接 return，兼容未登录态不报错
+  - `onMounted` 中追加 `fetchUserStats()` 调用
+  - 清理无用的 `reactive` import
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/user/stats` 接口
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：优化首页右侧创作中心卡片，移除冗余头部，改造按钮
+- **核心技术点**：
+  - 删除 `<template #header>` 头部（"创作中心" + 用户图标），卡片内容更紧凑
+  - "写文章"按钮改为 "进入创作中心"，跳转 `/creator` 占位路由
+  - 新增 `.creator-btn` 样式，`width: 100%`、`margin-top: 16px`
+  - 清理残留的孤立 `.write-btn {` 空块，避免 CSS 解析错误
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：实现 `/creator` 创作中心路由页面
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：修复首页筛选状态下点击"首页"无法回到全部列表的 Bug
+- **核心技术点**：
+  - `watch(() => route.query, ...)` 监听整个 query 对象，同组件跳转时也能响应
+  - FrontLayout 首页改为 `@click="$router.push('/')"` 强制回根路径，确保 URL 无参数残留
+- **修改的文件**：`src/views/HomeView.vue`（新增 watch）、`src/layout/FrontLayout.vue`（首页导航改造）
+- **遗留问题/下一步**：后端 `/artwork/feed` 需支持 `categoryId` 参数筛选
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：创作中心卡片接入后端 `/user/stats` 真实数据
+- **核心技术点**：
+  - `statsData`（reactive）替换为 `userStats`（ref），字段名对齐后端：`articleCount`、`totalViews`、`totalLikes`、`fanCount`
+  - `fetchUserStats` 在无 token 时直接 return，兼容未登录态不报错
+  - `onMounted` 中追加 `fetchUserStats()` 调用
+  - 清理无用的 `reactive` import
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/user/stats` 接口
+
+---
+
+- **日期**：2026-03-21
+- **完成功能**：优化首页右侧创作中心卡片，移除冗余头部，改造按钮
+- **核心技术点**：
+  - 删除 `<template #header>` 头部（"创作中心" + 用户图标），卡片内容更紧凑
+  - "写文章"按钮改为 "进入创作中心"，跳转 `/creator` 占位路由
+  - 新增 `.creator-btn` 样式，`width: 100%`、`margin-top: 16px`
+  - 清理残留的孤立 `.write-btn {` 空块，避免 CSS 解析错误
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：实现 `/creator` 创作中心路由页面

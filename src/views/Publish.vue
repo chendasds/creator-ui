@@ -56,21 +56,21 @@
         </el-form-item>
 
         <!-- 封面图 -->
-        <el-form-item label="封面图片 URL" prop="coverUrl">
-          <el-input
-            v-model="form.coverUrl"
-            placeholder="请输入封面图片地址"
+        <el-form-item label="封面图片" prop="coverUrl">
+          <el-upload
+            class="cover-uploader"
+            action="#"
+            :http-request="customUpload"
+            :show-file-list="false"
+            accept="image/*"
           >
-            <template #append>
-              <el-button @click="previewCover">预览</el-button>
-            </template>
-          </el-input>
+            <img v-if="form.coverUrl" :src="form.coverUrl" class="cover-preview" />
+            <el-icon v-else class="cover-uploader-icon"><Plus /></el-icon>
+          </el-upload>
+          <div style="font-size: 12px; color: #909399; margin-top: 8px; line-height: 1.2;">
+            点击上方区域上传本地图片。推荐尺寸 16:9，支持 jpg/png 格式。
+          </div>
         </el-form-item>
-
-        <!-- 封面预览 -->
-        <div v-if="form.coverUrl" class="cover-preview">
-          <img :src="form.coverUrl" alt="封面预览" @error="handleCoverError" />
-        </div>
 
         <!-- 摘要 -->
         <el-form-item label="文章摘要" prop="description">
@@ -121,6 +121,7 @@
 import { ref, reactive, shallowRef, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import request from '@/api/request'
@@ -150,6 +151,29 @@ const form = reactive({
   description: '',
   content: ''
 })
+
+/**
+ * 本地上传封面
+ */
+const customUpload = async (options) => {
+  const formData = new FormData()
+  formData.append('file', options.file)
+
+  try {
+    const res = await request.post('/file/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    if (res.code === 200) {
+      form.coverUrl = res.data
+      ElMessage.success('封面上传成功')
+    } else {
+      ElMessage.error(res.message || '上传失败')
+    }
+  } catch (error) {
+    console.error('上传出错:', error)
+    ElMessage.error('上传出错，请检查网络或后端服务')
+  }
+}
 
 /**
  * 获取标签列表
@@ -334,18 +358,36 @@ onBeforeUnmount(() => {
   resize: vertical;
 }
 
-/* 封面预览 */
-.cover-preview {
-  margin-bottom: 22px;
+/* 封面上传 */
+.cover-uploader {
+  border: 1px dashed #d9d9d9;
   border-radius: 8px;
+  cursor: pointer;
+  position: relative;
   overflow: hidden;
-  max-height: 200px;
+  width: 320px;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fafafa;
+  transition: border-color 0.3s;
 }
 
-.cover-preview img {
+.cover-uploader:hover {
+  border-color: #409eff;
+}
+
+.cover-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+}
+
+.cover-preview {
   width: 100%;
-  max-height: 200px;
+  height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 /* 编辑器样式 */

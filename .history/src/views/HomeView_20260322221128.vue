@@ -110,7 +110,7 @@
           </div>
           <el-button type="primary" class="creator-btn" @click="$router.push('/creator')">
             <el-icon><Edit /></el-icon>
-            进入创作中心
+            创作分享
           </el-button>
         </el-card>
 
