@@ -8,7 +8,7 @@
           </router-link>
           <nav class="nav-links">
             <span class="nav-item" @click="$router.push('/')">首页</span>
-            <span class="nav-item" @click="handleNavClick('follow')">关注</span>
+            <span class="nav-item" @click="$router.push({ path: '/', query: { feedType: 'follow' } })">关注</span>
             <span class="nav-item" @click="handleNavClick('category')">分类</span>
           </nav>
         </div>
@@ -107,7 +107,13 @@ const handleNavClick = (type) => {
 const handleCommand = (command) => {
   switch (command) {
     case 'profile':
-      router.push('/profile')
+      const myUserId = userInfo.value?.id
+      if (myUserId) {
+        router.push(`/user/${myUserId}`)
+      } else {
+        ElMessage.error('未获取到用户信息，请重新登录')
+        router.push('/login')
+      }
       break
     case 'admin':
       router.push('/admin/dashboard')
@@ -119,6 +125,7 @@ const handleCommand = (command) => {
         type: 'warning'
       }).then(() => {
         localStorage.removeItem('user')
+        localStorage.removeItem('token')
         ElMessage.success('已退出登录')
         router.push('/login')
       }).catch(() => {})

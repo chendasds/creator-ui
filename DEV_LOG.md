@@ -1,6 +1,8 @@
 # 开发日志
 
----
+
+
+
 
 - **日期**：2026-03-21
 - **完成功能**：首页 UI 重构（左侧文章列表 + 右侧个人数据统计 + 热门标签云）
@@ -515,3 +517,81 @@
   - 清理残留的孤立 `.write-btn {` 空块，避免 CSS 解析错误
 - **修改的文件**：`src/views/HomeView.vue`
 - **遗留问题/下一步**：实现 `/creator` 创作中心路由页面
+
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：修复个人主页查看自己时仍显示"关注"按钮的 Bug
+- **核心技术点**：
+  - `currentUserId` 从 `localStorage.getItem('user')` 中解析已登录用户 ID
+  - `isMyOwnSpace` 计算属性判断当前访问主页的 `targetUserId` 是否等于 `currentUserId`
+  - 模板使用 `v-if="isMyOwnSpace"` / `v-else` 动态切换"编辑资料"和"关注"按钮
+  - `handleEditProfile` / `handleToggleFollow` 占位方法待后续绑定真实路由
+- **修改的文件**：`src/views/UserSpaceView.vue`
+- **遗留问题/下一步**：编辑资料和关注功能需绑定真实后端接口
+
+---
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：个人主页关注按钮状态联动与点击请求
+- **核心技术点**：
+  - `isFollowing` 响应式变量存储关注状态
+  - `checkFollowStatus(id)` 调用 `/follow/check` 接口获取初始关注状态
+  - `handleToggleFollow()` 调用 `/follow/toggle` 接口切换关注状态
+  - 关注成功时 `fanCount += 1`，取消关注时 `fanCount -= 1`
+  - 按钮根据 `isFollowing` 动态切换样式和文案（"已关注"/"+ 关注"）
+  - 自己主页不调用关注状态接口
+- **修改的文件**：`src/views/UserSpaceView.vue`
+- **遗留问题/下一步**：后端需实现 `/follow/check` 和 `/follow/toggle` 接口
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：顶栏"关注"变成过滤频道，复用首页信息流
+- **核心技术点**：
+  - FrontLayout 顶栏"关注"改为 `@click="$router.push({ path: '/', query: { feedType: 'follow' } })"`
+  - HomeView 新增 `isFollowFeed` 响应式变量
+  - `fetchArticles` 请求参数追加 `isFollowFeed: isFollowFeed.value`
+  - `watch(() => route.query)` 解析 `feedType === 'follow'` 识别关注流模式
+  - onMounted 中初始化解析 `feedType`
+  - 关注流模式显示蓝色"正在查看我的关注动态"提示
+- **修改的文件**：`src/layout/FrontLayout.vue`、`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端 `/artwork/feed` 需支持 `isFollowFeed` 参数筛选关注用户文章
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：路由守卫白名单清理（登录注册整合）
+- **核心技术点**：
+  - 删除 `/register` 路由配置（Login.vue 已整合 Tabs）
+  - 白名单仅保留 `['/login']`
+- **修改的文件**：`src/router/index.js`
+- **遗留问题/下一步**：无
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：修复个人主页查看自己时仍显示"关注"按钮的 Bug
+- **核心技术点**：
+  - `currentUserId` 从 `localStorage.getItem('user')` 中解析已登录用户 ID
+  - `isMyOwnSpace` 计算属性判断当前访问主页的 `targetUserId` 是否等于 `currentUserId`
+  - 模板使用 `v-if="isMyOwnSpace"` / `v-else` 动态切换"编辑资料"和"关注"按钮
+  - `handleEditProfile` / `handleToggleFollow` 占位方法待后续绑定真实路由
+- **修改的文件**：`src/views/UserSpaceView.vue`
+- **遗留问题/下一步**：编辑资料和关注功能需绑定真实后端接口
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：修复退出登录后 token 未清除导致路由守卫失效的 Bug
+- **核心技术点**：
+  - FrontLayout.vue 的 logout 分支中添加 `localStorage.removeItem('token')`
+  - Layout.vue 的 handleLogout 函数中添加 `localStorage.removeItem('token')`
+  - 确保退出时清除 user 和 token 两个 key，路由守卫才能正确拦截
+- **修改的文件**：`src/layout/FrontLayout.vue`、`src/layout/Layout.vue`
+- **遗留问题/下一步**：无
+
+---

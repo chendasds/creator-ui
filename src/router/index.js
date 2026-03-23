@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
-const whiteList = ['/login', '/profile']
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -33,6 +31,10 @@ const router = createRouter({
           component: () => import('../views/UserProfile.vue')
         },
         {
+          path: '/user/:id',
+          component: () => import('../views/UserSpaceView.vue')
+        },
+        {
           path: '/category',
           component: () => import('../views/CategoryView.vue')
         }
@@ -60,18 +62,25 @@ const router = createRouter({
   ]
 })
 
+// 全局前置路由守卫：强制登录
 router.beforeEach((to, from, next) => {
-  const userStr = localStorage.getItem('user')
-  const hasLogin = !!userStr
+  const token = localStorage.getItem('token')
 
-  if (!hasLogin && !whiteList.includes(to.path)) {
-    ElMessage.warning('请先登录')
-    next('/login')
-  } else if (hasLogin && to.path === '/login') {
-    next('/home')
-  } else {
-    next()
+  // 定义免登录白名单页面
+  const publicPages = ['/login']
+  const authRequired = !publicPages.includes(to.path)
+
+  if (authRequired && !token) {
+    ElMessage.warning('请先登录系统')
+    return next('/login')
   }
+
+  // 已登录用户访问登录页时，跳转到首页
+  if (token && to.path === '/login') {
+    return next('/home')
+  }
+
+  next()
 })
 
 export default router

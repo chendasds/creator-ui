@@ -1,48 +1,58 @@
 <template>
-  <div class="home-container">
+  <div class="user-space-container">
     <el-row :gutter="20">
-      <!-- 左侧信息流列表 -->
+      <!-- 左侧内容区域 -->
       <el-col :span="16">
-        <el-card class="feed-card" shadow="never">
-          <!-- 关注流提示 -->
-          <div v-if="isFollowFeed" style="margin-bottom: 20px; font-weight: bold; color: #409eff;">
-            正在查看我的关注动态
+        <!-- 用户信息卡片 -->
+        <el-card class="profile-header-card" shadow="never">
+          <div class="profile-header">
+            <el-avatar :size="80" :src="userInfo.avatarUrl">
+              {{ userInfo.nickname?.charAt(0) || userInfo.username?.charAt(0) || 'U' }}
+            </el-avatar>
+            <div class="profile-info">
+              <h2 class="profile-name">{{ userInfo.nickname || userInfo.username || '未命名用户' }}</h2>
+              <p class="profile-bio">{{ userInfo.bio || '这个人很懒，暂时没有写简介...' }}</p>
+            </div>
+            <div class="profile-actions">
+              <el-button 
+                v-if="isMyOwnSpace" 
+                type="primary" 
+                @click="handleEditProfile"
+              >
+                编辑资料
+              </el-button>
+              <el-button 
+                v-else 
+                :type="isFollowing ? 'default' : 'primary'" 
+                :plain="!isFollowing" 
+                @click="handleToggleFollow"
+              >
+                {{ isFollowing ? '已关注' : '+ 关注' }}
+              </el-button>
+            </div>
           </div>
+        </el-card>
 
-          <!-- 分类筛选提示 -->
-          <div v-else-if="activeCategoryId" style="margin-bottom: 20px; padding: 15px; background-color: #f0f9eb; color: #67c23a; border-radius: 8px;">
-            当前正在浏览特定分类频道。 <el-button type="text" @click="clearCategory">查看全部</el-button>
-          </div>
-
-          <el-tabs v-model="activeTab" class="feed-tabs">
-            <el-tab-pane label="推荐" name="recommend" />
-            <el-tab-pane label="最新发布" name="latest" />
+        <!-- 文章列表卡片 -->
+        <el-card class="article-list-card" shadow="never">
+          <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+            <el-tab-pane label="Ta的发布" name="latest" />
           </el-tabs>
 
           <div class="article-list">
-            <el-empty v-if="articleList.length === 0" description="暂无作品" />
-           
-           <div v-else class="article-items">
-             <div
-               v-for="item in articleList"
-               :key="item.id"
+            <el-empty v-if="articleList.length === 0" description="Ta还没有发布过创作" />
+
+            <div v-else class="article-items">
+              <div
+                v-for="item in articleList"
+                :key="item.id"
                 class="article-item"
                 @click="$router.push('/artwork/' + item.id)"
               >
                 <div class="article-content">
                   <h3 class="article-title">{{ item.title }}</h3>
                   <div class="article-meta">
-                    <span
-                      class="author-link"
-                      @click.stop="$router.push(`/user/${item.userId}`)"
-                    >
-                      {{ item.authorName || '匿名用户' }}
-                    </span>
-                    <span class="meta-separator">·</span>
-                    <span 
-                      class="category-link" 
-                      @click.stop="$router.push({ path: '/', query: { categoryId: item.categoryId } })"
-                    >
+                    <span class="category-link" @click.stop="$router.push({ path: '/home', query: { categoryId: item.categoryId } })">
                       {{ item.categoryName || '未分类' }}
                     </span>
                     <span class="meta-separator">·</span>
@@ -57,7 +67,6 @@
                       :style="{ '--hover-color': tag.color || '#409eff' }"
                       disable-transitions
                       size="small"
-                      @click.stop="handleTagClick(tag.id)"
                     >
                       {{ tag.name }}
                     </el-tag>
@@ -103,30 +112,32 @@
 
       <!-- 右侧侧边栏 -->
       <el-col :span="8">
-        <!-- 个人数据统计卡片 -->
+        <!-- 创作成就卡片 -->
         <el-card class="sidebar-card stats-card" shadow="never">
+          <template #header>
+            <div class="card-header">
+              <el-icon><Trophy /></el-icon>
+              <span>创作成就</span>
+            </div>
+          </template>
           <div class="stats-grid">
             <div class="stat-item">
-              <div class="stat-value">{{ userStats.articleCount }}</div>
+              <div class="stat-value">{{ publicUserStats.articleCount || 0 }}</div>
               <div class="stat-label">创作数</div>
             </div>
             <div class="stat-item">
-              <div class="stat-value">{{ userStats.totalViews }}</div>
-              <div class="stat-label">总浏览</div>
+              <div class="stat-value">{{ publicUserStats.totalViews || 0 }}</div>
+              <div class="stat-label">总阅读</div>
             </div>
             <div class="stat-item">
-              <div class="stat-value">{{ userStats.totalLikes }}</div>
+              <div class="stat-value">{{ publicUserStats.totalLikes || 0 }}</div>
               <div class="stat-label">获赞数</div>
             </div>
             <div class="stat-item">
-              <div class="stat-value">{{ userStats.fanCount }}</div>
+              <div class="stat-value">{{ publicUserStats.fanCount || 0 }}</div>
               <div class="stat-label">粉丝数</div>
             </div>
           </div>
-          <el-button type="primary" class="creator-btn" @click="$router.push('/creator')">
-            <el-icon><Edit /></el-icon>
-            进入创作中心
-          </el-button>
         </el-card>
 
         <!-- 热门标签云卡片 -->
@@ -142,33 +153,10 @@
               v-for="tag in tagList"
               :key="tag.id"
               class="modern-tag"
-              :class="{ 'is-active': activeTagId === tag.id }"
               :style="{ '--hover-color': tag.color || '#409eff' }"
               disable-transitions
-              @click="handleTagClick(tag.id)"
             >
               {{ tag.name }}
-            </el-tag>
-          </div>
-        </el-card>
-
-        <!-- 热门分类（保留原有） -->
-        <el-card class="sidebar-card sidebar-tags" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <el-icon><Grid /></el-icon>
-              <span>平台热门分类</span>
-            </div>
-          </template>
-          <div class="tags-wrapper">
-            <el-tag
-              v-for="tag in hotCategories"
-              :key="tag"
-              class="category-tag"
-              effect="plain"
-              round
-            >
-              {{ tag }}
             </el-tag>
           </div>
         </el-card>
@@ -178,74 +166,81 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, watch, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { View, Document, ChatDotRound, Pointer, User, Edit, Collection, Grid } from '@element-plus/icons-vue'
+import { View, Document, ChatDotRound, Pointer, Trophy, Collection } from '@element-plus/icons-vue'
 import request from '@/api/request'
 
 const route = useRoute()
+const router = useRouter()
 
-const activeTab = ref('recommend')
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(0)
+// 当前登录用户 ID
+const currentUserId = ref(null)
 
-// 文章列表数据（真实 API）
-const articleList = ref([])
+// 目标用户 ID（当前访问的主页作者）
+const targetUserId = ref(null)
 
-// 标签列表（真实 API）
-const tagList = ref([])
+// 是否已关注该用户
+const isFollowing = ref(false)
 
-// 当前选中的标签 ID
-const activeTagId = ref(null)
-
-// 当前选中的分类 ID
-const activeCategoryId = ref(null)
-
-// 是否为关注流模式
-const isFollowFeed = ref(false)
-
-const hotCategories = ref([
-  '前端开发', '后端技术', '人工智能', '产品设计', 
-  '创业故事', '职场成长', '读书笔记', '生活感悟'
-])
-
-// 个人数据统计（后端真实数据）
-const userStats = ref({
+// 判断是否访问的是自己的主页
+const isMyOwnSpace = computed(() => {
+  if (!currentUserId.value || !targetUserId.value) return false
+  return String(currentUserId.value) === String(targetUserId.value)
+})
+const userInfo = ref({})
+const publicUserStats = ref({
   articleCount: 0,
   totalViews: 0,
   totalLikes: 0,
   fanCount: 0
 })
+const articleList = ref([])
+const tagList = ref([])
+const activeTab = ref('latest')
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
 
-const fetchUserStats = async () => {
-  if (!localStorage.getItem('token')) return
+/**
+ * 拉取目标用户信息
+ */
+const fetchUserInfo = async (id) => {
   try {
-    const res = await request.get('/user/stats')
-    if (res.code === 200 && res.data) {
-      userStats.value = res.data
+    const res = await request.get(`/user/${id}`)
+    if (res.code === 200) {
+      userInfo.value = res.data || {}
+    } else {
+      userInfo.value = res.data || res || {}
     }
   } catch (error) {
-    console.log('获取用户统计数据失败，可能未登录')
+    console.error('获取用户信息失败:', error)
   }
 }
 
 /**
- * 获取文章列表
+ * 拉取目标用户数据面板
  */
-const fetchArticles = async () => {
+const fetchUserStats = async (id) => {
+  try {
+    const res = await request.get(`/user/public/stats/${id}`)
+    if (res.code === 200 && res.data) {
+      publicUserStats.value = res.data
+    }
+  } catch (error) {
+    console.error('获取用户统计数据失败:', error)
+  }
+}
+
+/**
+ * 拉取该用户的文章列表 (带上 userId 参数)
+ */
+const fetchArticles = async (id) => {
   try {
     const res = await request.get('/artwork/feed', {
-      params: { 
-        current: currentPage.value, 
-        size: pageSize.value, 
-        tagId: activeTagId.value, 
-        categoryId: activeCategoryId.value,
-        isFollowFeed: isFollowFeed.value
-      }
+      params: { current: currentPage.value, size: pageSize.value, userId: id }
     })
-    console.log('首页文章获取结果:', res)
     if (res.code === 200 && res.data) {
       articleList.value = res.data.records || []
       total.value = res.data.total || 0
@@ -254,92 +249,9 @@ const fetchArticles = async () => {
       total.value = 0
     }
   } catch (error) {
-    console.error('获取文章流失败:', error)
+    console.error('获取用户文章列表失败:', error)
   }
 }
-
-/**
- * 监听 Tab 切换，重新获取数据
- */
-watch(activeTab, () => {
-  currentPage.value = 1
-  fetchArticles()
-})
-
-const handleCurrentChange = (val) => {
-  currentPage.value = val
-  fetchArticles()
-}
-
-const handleWrite = () => {
-  ElMessage.info('写文章功能开发中')
-}
-
-const handleTagClick = (id) => {
-  activeTagId.value = activeTagId.value === id ? null : id
-  currentPage.value = 1
-  fetchArticles()
-}
-
-const clearCategory = () => {
-  activeCategoryId.value = null
-  currentPage.value = 1
-  fetchArticles()
-}
-
-/**
- * 兼容标签数据结构（可能有 color 字段，也可能只是字符串）
- */
-const getTagStyle = (tag) => {
-  const name = tag.name || tag
-  const color = tag.color || '#909399'
-  return {
-    backgroundColor: color + '15',
-    borderColor: color,
-    color: color
-  }
-}
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diff = now - date
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  
-  if (days === 0) return '今天'
-  if (days === 1) return '昨天'
-  if (days < 7) return `${days}天前`
-  if (days < 30) return `${Math.floor(days / 7)}周前`
-  if (days < 365) return `${Math.floor(days / 30)}个月前`
-  return `${Math.floor(days / 365)}年前`
-}
-
-// 监听路由参数的变化（解决同组件跳转不刷新的问题）
-watch(() => route.query, (newQuery) => {
-  activeCategoryId.value = newQuery.categoryId ? Number(newQuery.categoryId) : null
-  activeTagId.value = newQuery.tagId ? Number(newQuery.tagId) : null
-  isFollowFeed.value = newQuery.feedType === 'follow'
-  fetchArticles()
-})
-
-onMounted(() => {
-  // 拦截路由中的 categoryId 参数
-  if (route.query.categoryId) {
-    activeCategoryId.value = Number(route.query.categoryId)
-  }
-  // 拦截路由中的 tagId 参数
-  if (route.query.tagId) {
-    activeTagId.value = Number(route.query.tagId)
-  }
-  // 拦截路由中的 feedType 参数（关注流）
-  if (route.query.feedType === 'follow') {
-    isFollowFeed.value = true
-  }
-  fetchArticles()
-  fetchTags()
-  fetchUserStats()
-})
 
 /**
  * 获取标签列表
@@ -356,33 +268,142 @@ const fetchTags = async () => {
     console.error('获取标签列表失败:', error)
   }
 }
+
+/**
+ * 检查关注状态
+ */
+const checkFollowStatus = async (id) => {
+  if (!localStorage.getItem('token') || isMyOwnSpace.value) return
+  try {
+    const res = await request.get('/follow/check', { params: { followeeId: id } })
+    if (res.code === 200) {
+      isFollowing.value = res.data
+    }
+  } catch (error) {
+    console.error('获取关注状态失败:', error)
+  }
+}
+
+const loadAllData = (id) => {
+  if (!id) return
+  fetchUserInfo(id)
+  fetchUserStats(id)
+  fetchArticles(id)
+  checkFollowStatus(id)
+}
+
+const handleTabChange = () => {
+  currentPage.value = 1
+  loadAllData(targetUserId.value)
+}
+
+const handleCurrentChange = (val) => {
+  currentPage.value = val
+  fetchArticles(targetUserId.value)
+}
+
+/**
+ * 编辑个人资料（仅自己主页显示）
+ */
+const handleEditProfile = () => {
+  console.log('点击了编辑资料')
+}
+
+/**
+ * 关注/取消关注切换（仅他人主页显示）
+ */
+const handleToggleFollow = async () => {
+  if (!localStorage.getItem('token')) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  try {
+    const res = await request.post('/follow/toggle', { followeeId: targetUserId.value })
+    if (res.code === 200) {
+      // 前端局部翻转状态，并根据状态增加或减少粉丝数
+      isFollowing.value = !isFollowing.value
+      if (isFollowing.value) {
+        publicUserStats.value.fanCount += 1
+        ElMessage.success('关注成功')
+      } else {
+        publicUserStats.value.fanCount -= 1
+        ElMessage.success('已取消关注')
+      }
+    }
+  } catch (error) {
+    console.error('关注操作失败:', error)
+    ElMessage.error('操作失败，请稍后重试')
+  }
+}
+
+onMounted(() => {
+  // 获取当前登录用户 ID
+  const userStr = localStorage.getItem('user')
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr)
+      currentUserId.value = user.id
+    } catch (e) {
+      console.error('解析用户信息失败:', e)
+    }
+  }
+  targetUserId.value = route.params.id
+  loadAllData(targetUserId.value)
+  fetchTags()
+})
+
+// 监听路由变化，解决从 User A 主页跳转到 User B 主页时不刷新的问题
+watch(() => route.params.id, (newId) => {
+  if (newId) {
+    targetUserId.value = newId
+    currentPage.value = 1
+    loadAllData(newId)
+  }
+})
 </script>
 
 <style scoped>
-.home-container {
+.user-space-container {
   padding: 0;
 }
 
-.feed-card {
+/* 用户信息卡片样式 */
+.profile-header-card {
   border-radius: 12px;
   border: none;
+  margin-bottom: 20px;
 }
 
-.feed-tabs :deep(.el-tabs__header) {
-  margin-bottom: 16px;
+.profile-header {
+  display: flex;
+  gap: 20px;
+  align-items: center;
 }
 
-.feed-tabs :deep(.el-tabs__item) {
-  font-size: 16px;
-  font-weight: 500;
+.profile-info {
+  flex: 1;
 }
 
-.feed-tabs :deep(.el-tabs__item.is-active) {
-  color: #409eff;
+.profile-name {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  color: #1a1a1a;
 }
 
-.feed-tabs :deep(.el-tabs__active-bar) {
-  background-color: #409eff;
+.profile-bio {
+  margin: 0;
+  color: #909399;
+  font-size: 14px;
+}
+
+.profile-actions {
+  flex-shrink: 0;
+}
+
+/* 文章列表卡片样式 */
+.article-list-card {
+  border-radius: 12px;
+  border: none;
 }
 
 .article-list {
@@ -448,16 +469,6 @@ const fetchTags = async () => {
   color: #d3d6d8;
 }
 
-.author-link {
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.author-link:hover {
-  color: #409eff;
-  text-decoration: underline;
-}
-
 .category-link {
   cursor: pointer;
   transition: color 0.3s;
@@ -465,6 +476,12 @@ const fetchTags = async () => {
 
 .category-link:hover {
   color: #409eff;
+  text-decoration: underline;
+}
+
+.category:hover {
+  color: #409eff;
+  cursor: pointer;
 }
 
 .article-summary {
@@ -480,7 +497,6 @@ const fetchTags = async () => {
   margin-bottom: 10px;
 }
 
-/* 文章标签样式 */
 .article-tags {
   display: flex;
   flex-wrap: wrap;
@@ -493,7 +509,7 @@ const fetchTags = async () => {
   color: #515767 !important;
   border: none !important;
   border-radius: 4px !important;
-  cursor: pointer;
+  font-size: 12px;
   transition: all 0.3s;
 }
 
@@ -528,7 +544,7 @@ const fetchTags = async () => {
   object-fit: cover;
 }
 
-/* 侧边栏卡片 */
+/* 侧边栏卡片样式 */
 .sidebar-card {
   border-radius: 12px;
   border: none;
@@ -558,7 +574,7 @@ const fetchTags = async () => {
   color: #409eff;
 }
 
-/* 个人数据统计卡片 */
+/* 数据统计卡片 */
 .stats-card :deep(.el-card__body) {
   padding: 20px 16px;
 }
@@ -567,15 +583,6 @@ const fetchTags = async () => {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  margin-bottom: 20px;
-}
-
-.creator-btn {
-  width: 100%;
-  height: 40px;
-  font-size: 15px;
-  border-radius: 20px;
-  margin-top: 16px;
 }
 
 .stat-item {
@@ -631,29 +638,6 @@ const fetchTags = async () => {
 .modern-tag:hover {
   color: var(--hover-color) !important;
   background-color: #e8eaec !important;
-  transform: translateY(-1px);
-}
-
-.modern-tag.is-active {
-  color: #ffffff !important;
-  background-color: var(--hover-color) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
-
-/* 热门分类卡片 */
-.tags-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.category-tag {
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.category-tag:hover {
   transform: translateY(-1px);
 }
 </style>

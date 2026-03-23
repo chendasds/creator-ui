@@ -9,37 +9,21 @@
       <!-- 文章标题 -->
       <h1 class="artwork-title">{{ artwork.title }}</h1>
 
-      <!-- Meta 信息 -->
-      <div class="artwork-meta">
-        <span class="meta-item">
-          <el-icon><User /></el-icon>
+      <!-- Meta 信息（简洁版） -->
+      <div class="meta-info" style="color: #8a919f; font-size: 14px; margin: 15px 0; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <span
+          class="author-link-detail"
+          @click="$router.push(`/user/${artwork.userId}`)"
+        >
           {{ artwork.authorName }}
         </span>
-        <span class="meta-separator">·</span>
-        <span class="meta-item">
-          <el-icon><Collection /></el-icon>
+        <el-divider direction="vertical" />
+        <span 
+          class="category-link-detail" 
+          @click="$router.push({ path: '/', query: { categoryId: artwork.categoryId } })"
+        >
           {{ artwork.categoryName }}
         </span>
-        <span class="meta-separator">·</span>
-        <span class="meta-item">
-          <el-icon><Clock /></el-icon>
-          {{ formatDate(artwork.createTime) }}
-        </span>
-        <span class="meta-separator">·</span>
-        <span class="meta-item">
-          <el-icon><View /></el-icon>
-          {{ artwork.viewCount || 0 }}
-        </span>
-        <span class="meta-separator">·</span>
-        <span class="meta-item">
-          <el-icon><Document /></el-icon>
-          {{ artwork.wordCount || 0 }} 字
-        </span>
-      </div>
-
-      <!-- 字数与阅读时长 -->
-      <div class="meta-info" style="color: #8a919f; font-size: 14px; margin: 15px 0; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-        <span>{{ artwork.authorName }}</span>
         <span>{{ artwork.createTime ? artwork.createTime.split('T')[0] : '' }}</span>
         <span>阅读 {{ artwork.viewCount || 0 }}</span>
         <span>全篇约 {{ artwork.wordCount || 0 }} 字，预计阅读 {{ Math.ceil((artwork.wordCount || 0) / 400) || 1 }} 分钟</span>
@@ -227,6 +211,7 @@ const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726
 const artwork = ref({
   title: '',
   authorName: '',
+  userId: null,
   categoryName: '',
   createTime: '',
   viewCount: 0,
@@ -554,6 +539,27 @@ onMounted(() => {
 :deep(.el-divider) {
   margin: 24px 0;
   border-color: #f0f2f5;
+}
+
+/* 作者链接样式 */
+.author-link-detail {
+  cursor: pointer;
+  font-weight: bold;
+  color: #515767;
+  transition: color 0.3s;
+}
+
+.author-link-detail:hover {
+  color: #409eff;
+}
+
+.category-link-detail {
+  cursor: pointer;
+  color: #515767;
+  transition: color 0.3s;
+}
+.category-link-detail:hover {
+  color: #409eff;
 }
 
 /* 标签云 */
