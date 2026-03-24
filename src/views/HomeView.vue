@@ -14,6 +14,12 @@
             当前正在浏览特定分类频道。 <el-button type="text" @click="clearCategory">查看全部</el-button>
           </div>
 
+          <!-- 搜索结果提示 -->
+          <div v-else-if="searchKeyword" style="margin-bottom: 20px; padding: 15px; background-color: #f4f4f5; color: #909399; border-radius: 8px;">
+            包含 "<strong>{{ searchKeyword }}</strong>" 的搜索结果。
+            <el-button type="text" @click="$router.push('/')">清除搜索</el-button>
+          </div>
+
           <el-tabs v-model="activeTab" class="feed-tabs">
             <el-tab-pane label="推荐" name="recommend" />
             <el-tab-pane label="最新发布" name="latest" />
@@ -129,12 +135,12 @@
           </el-button>
         </el-card>
 
-        <!-- 热门标签云卡片 -->
+        <!-- 标签云卡片 -->
         <el-card class="sidebar-card tags-cloud-card" shadow="never">
           <template #header>
             <div class="card-header">
               <el-icon><Collection /></el-icon>
-              <span>热门标签</span>
+              <span>标签</span>
             </div>
           </template>
           <div class="tag-cloud">
@@ -157,18 +163,20 @@
           <template #header>
             <div class="card-header">
               <el-icon><Grid /></el-icon>
-              <span>平台热门分类</span>
+              <span>热门分类</span>
             </div>
           </template>
           <div class="tags-wrapper">
             <el-tag
-              v-for="tag in hotCategories"
-              :key="tag"
-              class="category-tag"
-              effect="plain"
-              round
+              v-for="category in hotCategories"
+              :key="category.id"
+              class="modern-tag category-tag"
+              :class="{ 'is-active': activeCategoryId === category.id }"
+              style="--hover-color: #409eff;"
+              disable-transitions
+              @click="$router.push({ path: '/', query: { categoryId: category.id } })"
             >
-              {{ tag }}
+              {{ category.name }}
             </el-tag>
           </div>
         </el-card>
@@ -203,13 +211,13 @@ const activeTagId = ref(null)
 // 当前选中的分类 ID
 const activeCategoryId = ref(null)
 
+// 搜索关键词
+const searchKeyword = ref(null)
+
 // 是否为关注流模式
 const isFollowFeed = ref(false)
 
-const hotCategories = ref([
-  '前端开发', '后端技术', '人工智能', '产品设计', 
-  '创业故事', '职场成长', '读书笔记', '生活感悟'
-])
+const hotCategories = ref([])
 
 // 个人数据统计（后端真实数据）
 const userStats = ref({
@@ -237,12 +245,14 @@ const fetchUserStats = async () => {
 const fetchArticles = async () => {
   try {
     const res = await request.get('/artwork/feed', {
-      params: { 
-        current: currentPage.value, 
-        size: pageSize.value, 
-        tagId: activeTagId.value, 
+      params: {
+        current: currentPage.value,
+        size: pageSize.value,
+        tagId: activeTagId.value,
         categoryId: activeCategoryId.value,
-        isFollowFeed: isFollowFeed.value
+        isFollowFeed: isFollowFeed.value,
+        sortType: activeTab.value,
+        keyword: searchKeyword.value
       }
     })
     console.log('首页文章获取结果:', res)
@@ -320,6 +330,10 @@ watch(() => route.query, (newQuery) => {
   activeCategoryId.value = newQuery.categoryId ? Number(newQuery.categoryId) : null
   activeTagId.value = newQuery.tagId ? Number(newQuery.tagId) : null
   isFollowFeed.value = newQuery.feedType === 'follow'
+  searchKeyword.value = newQuery.keyword || null
+  if (newQuery.keyword) {
+    currentPage.value = 1
+  }
   fetchArticles()
 })
 
@@ -336,9 +350,14 @@ onMounted(() => {
   if (route.query.feedType === 'follow') {
     isFollowFeed.value = true
   }
+  // 拦截路由中的 keyword 参数（搜索）
+  if (route.query.keyword) {
+    searchKeyword.value = route.query.keyword
+  }
   fetchArticles()
   fetchTags()
   fetchUserStats()
+  fetchHotCategories()
 })
 
 /**
@@ -354,6 +373,20 @@ const fetchTags = async () => {
     }
   } catch (error) {
     console.error('获取标签列表失败:', error)
+  }
+}
+
+/**
+ * 获取热门分类
+ */
+const fetchHotCategories = async () => {
+  try {
+    const res = await request.get('/category/public/hot')
+    if (res.code === 200 && res.data) {
+      hotCategories.value = res.data
+    }
+  } catch (error) {
+    console.error('获取热门分类失败:', error)
   }
 }
 </script>
@@ -646,14 +679,5 @@ const fetchTags = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.category-tag {
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.category-tag:hover {
-  transform: translateY(-1px);
 }
 </style>

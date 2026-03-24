@@ -114,12 +114,12 @@
           </el-button>
         </el-card>
 
-        <!-- 热门标签云卡片 -->
+        <!-- 标签云卡片 -->
         <el-card class="sidebar-card tags-cloud-card" shadow="never">
           <template #header>
             <div class="card-header">
               <el-icon><Collection /></el-icon>
-              <span>热门标签</span>
+              <span>标签</span>
             </div>
           </template>
           <div class="tag-cloud">

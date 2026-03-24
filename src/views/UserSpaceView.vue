@@ -153,8 +153,10 @@
               v-for="tag in tagList"
               :key="tag.id"
               class="modern-tag"
+              :class="{ 'is-active': activeTagId === tag.id }"
               :style="{ '--hover-color': tag.color || '#409eff' }"
               disable-transitions
+              @click="handleTagClick(tag.id)"
             >
               {{ tag.name }}
             </el-tag>
@@ -199,6 +201,7 @@ const publicUserStats = ref({
 const articleList = ref([])
 const tagList = ref([])
 const activeTab = ref('latest')
+const activeTagId = ref(null)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -239,7 +242,7 @@ const fetchUserStats = async (id) => {
 const fetchArticles = async (id) => {
   try {
     const res = await request.get('/artwork/feed', {
-      params: { current: currentPage.value, size: pageSize.value, userId: id }
+      params: { current: currentPage.value, size: pageSize.value, userId: id, tagId: activeTagId.value }
     })
     if (res.code === 200 && res.data) {
       articleList.value = res.data.records || []
@@ -267,6 +270,15 @@ const fetchTags = async () => {
   } catch (error) {
     console.error('获取标签列表失败:', error)
   }
+}
+
+/**
+ * 处理标签点击筛选
+ */
+const handleTagClick = (id) => {
+  activeTagId.value = activeTagId.value === id ? null : id
+  currentPage.value = 1
+  fetchArticles(targetUserId.value)
 }
 
 /**

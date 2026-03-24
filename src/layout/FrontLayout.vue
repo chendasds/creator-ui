@@ -19,9 +19,10 @@
             placeholder="搜索作品、作者..."
             class="search-input"
             clearable
+            @keyup.enter="handleSearch"
           >
             <template #prefix>
-              <el-icon><Search /></el-icon>
+              <el-icon @click="handleSearch" style="cursor: pointer;"><Search /></el-icon>
             </template>
           </el-input>
         </div>
@@ -82,6 +83,12 @@ import { ArrowDown, Search, User, Setting, SwitchButton } from '@element-plus/ic
 const router = useRouter()
 const userInfo = ref(null)
 const searchText = ref('')
+
+const handleSearch = () => {
+  if (!searchText.value.trim()) return
+  router.push({ path: '/', query: { keyword: searchText.value.trim() } })
+  searchText.value = ''
+}
 
 const handleWrite = () => {
   router.push('/publish')

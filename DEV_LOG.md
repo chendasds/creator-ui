@@ -595,3 +595,50 @@
 - **遗留问题/下一步**：无
 
 ---
+
+- **日期**：2026-03-23
+- **完成功能**：首页 Tab 排序与 sortType 参数传递
+- **核心技术点**：
+  - Tab 默认值 `activeTab = ref('recommend')`（已是正确配置）
+  - Tab 顺序 "推荐" 在前、"最新发布" 在后（已是正确顺序）
+  - `fetchArticles` params 添加 `sortType: activeTab.value` 传给后端
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需支持 `sortType` 参数实现推荐/最新排序
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：首页热门分类改为后端接口调用，统一标签样式
+- **核心技术点**：
+  - `hotCategories` 改为空数组，通过 `fetchHotCategories()` 调用 `/category/public/hot` 获取
+  - 标签渲染复用 `modern-tag` 样式体系，支持悬浮动画和颜色块质感
+  - 点击分类标签跳转首页并传递 `categoryId` 参数
+  - 删除原有的 `.category-tag` 自定义样式
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/category/public/hot` 接口返回热门分类列表
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：个人主页热门标签点击筛选功能
+- **核心技术点**：
+  - 添加 `activeTagId = ref(null)` 状态记录选中标签
+  - `fetchArticles` params 添加 `tagId: activeTagId.value` 传给后端
+  - `handleTagClick(id)` 函数支持点击切换筛选，再次点击取消选中
+- **修改的文件**：`src/views/UserSpaceView.vue`
+- **遗留问题/下一步**：后端需支持 `tagId` 参数实现标签筛选
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：顶栏搜索框激活与首页搜索结果展示
+- **核心技术点**：
+  - FrontLayout.vue 添加 `handleSearch()` 函数，回车/点击图标触发跳转
+  - 首页接收 `keyword` 参数，`searchKeyword = ref(null)` 状态
+  - `fetchArticles` params 添加 `keyword` 传给后端
+  - watch 和 onMounted 监听/拦截 `keyword` 参数
+  - 模板添加搜索结果提示框，支持清除搜索
+- **修改的文件**：`src/layout/FrontLayout.vue`、`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需支持 `keyword` 参数实现搜索功能
+
+---
