@@ -57,6 +57,10 @@
                   <el-icon><Setting /></el-icon>
                   进入管理后台
                 </el-dropdown-item>
+                <el-dropdown-item command="settings">
+                  <el-icon><Setting /></el-icon>
+                  账号设置
+                </el-dropdown-item>
                 <el-dropdown-item divided command="logout" style="color: #f56c6c;">
                   <el-icon><SwitchButton /></el-icon>
                   退出登录
@@ -121,6 +125,9 @@ const handleCommand = (command) => {
         ElMessage.error('未获取到用户信息，请重新登录')
         router.push('/login')
       }
+      break
+    case 'settings':
+      router.push('/settings')
       break
     case 'admin':
       router.push('/admin/dashboard')

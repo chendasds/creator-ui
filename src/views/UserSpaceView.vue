@@ -10,14 +10,24 @@
               {{ userInfo.nickname?.charAt(0) || userInfo.username?.charAt(0) || 'U' }}
             </el-avatar>
             <div class="profile-info">
-              <h2 class="profile-name">{{ userInfo.nickname || userInfo.username || '未命名用户' }}</h2>
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <h2 class="profile-name" style="margin: 0;">{{ userInfo.nickname || userInfo.username || '未命名用户' }}</h2>
+
+                <el-tag v-if="userInfo.gender === 1" type="primary" size="small" effect="light" round style="padding: 0 6px;">
+                  <el-icon><Male /></el-icon> 
+                </el-tag>
+                <el-tag v-if="userInfo.gender === 2" type="danger" size="small" effect="light" round style="padding: 0 6px;">
+                  <el-icon><Female /></el-icon> 
+                </el-tag>
+              </div>
+
               <p class="profile-bio">{{ userInfo.bio || '这个人很懒，暂时没有写简介...' }}</p>
             </div>
             <div class="profile-actions">
               <el-button 
                 v-if="isMyOwnSpace" 
                 type="primary" 
-                @click="handleEditProfile"
+                @click="openEditDialog"
               >
                 编辑资料
               </el-button>
@@ -36,7 +46,12 @@
         <!-- 文章列表卡片 -->
         <el-card class="article-list-card" shadow="never">
           <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-            <el-tab-pane label="Ta的发布" name="latest" />
+            <el-tab-pane :label="isMyOwnSpace ? '我的发布' : 'Ta的发布'" name="latest" />
+
+            <el-tab-pane :label="isMyOwnSpace ? '我的点赞' : 'Ta的点赞'" name="liked" />
+            <el-tab-pane :label="isMyOwnSpace ? '我的收藏' : 'Ta的收藏'" name="collected" />
+            <el-tab-pane label="关注列表" name="following" />
+            <el-tab-pane label="粉丝列表" name="followers" />
           </el-tabs>
 
           <div class="article-list">
@@ -164,14 +179,61 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 编辑资料弹窗 -->
+    <el-dialog v-model="editDialogVisible" title="编辑个人资料" width="500px" destroy-on-close>
+      <el-form :model="editForm" label-width="80px">
+        <el-form-item label="头像">
+          <div class="avatar-edit-section" style="display: flex; align-items: center; gap: 20px;">
+            <el-avatar :size="80" :src="editForm.avatarUrl">
+              {{ editForm.nickname?.charAt(0)?.toUpperCase() || 'U' }}
+            </el-avatar>
+            <el-upload
+              class="avatar-uploader"
+              action="/api/file/upload"
+              :headers="uploadHeaders"
+              :show-file-list="false"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload"
+            >
+              <el-button size="small" type="primary">选择本地文件</el-button>
+              <template #tip>
+                <div class="el-upload__tip" style="color: #909399; font-size: 12px; margin-top: 8px;">
+                  仅支持 JPG/PNG，且不超过 2MB
+                </div>
+              </template>
+            </el-upload>
+          </div>
+        </el-form-item>
+        <el-form-item label="昵称">
+          <el-input v-model="editForm.nickname" maxlength="20" show-word-limit></el-input>
+        </el-form-item>
+        <el-form-item label="性别">
+          <el-radio-group v-model="editForm.gender">
+            <el-radio :value="0">保密</el-radio>
+            <el-radio :value="1">男</el-radio>
+            <el-radio :value="2">女</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="个人简介">
+          <el-input v-model="editForm.bio" type="textarea" :rows="3" placeholder="介绍一下你自己吧（最多500字）" maxlength="500" show-word-limit></el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="editDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitEdit" :loading="submitting">保存修改</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { View, Document, ChatDotRound, Pointer, Trophy, Collection } from '@element-plus/icons-vue'
+import { View, Document, ChatDotRound, Pointer, Trophy, Collection, Male, Female } from '@element-plus/icons-vue'
 import request from '@/api/request'
 
 const route = useRoute()
@@ -205,6 +267,53 @@ const activeTagId = ref(null)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
+
+// 编辑资料弹窗
+const editDialogVisible = ref(false)
+const submitting = ref(false)
+const editForm = reactive({
+  nickname: '',
+  avatarUrl: '',
+  gender: 0,
+  bio: ''
+})
+
+// --- 头像上传相关逻辑开始 ---
+const token = localStorage.getItem('token')
+const uploadHeaders = reactive({
+  Authorization: token ? `Bearer ${token}` : ''
+})
+
+/**
+ * 头像上传成功回调
+ */
+const handleAvatarSuccess = (res) => {
+  if (res.code === 200) {
+    editForm.avatarUrl = res.data
+    ElMessage.success('头像上传成功，点击保存修改后生效')
+  } else {
+    ElMessage.error(res.message || '头像上传失败')
+  }
+}
+
+/**
+ * 头像上传前校验
+ */
+const beforeAvatarUpload = (file) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('图片大小不能超过 2MB')
+    return false
+  }
+  return true
+}
+// --- 头像上传相关逻辑结束 ---
 
 /**
  * 拉取目标用户信息
@@ -315,10 +424,52 @@ const handleCurrentChange = (val) => {
 }
 
 /**
- * 编辑个人资料（仅自己主页显示）
+ * 打开编辑资料弹窗
  */
-const handleEditProfile = () => {
-  console.log('点击了编辑资料')
+const openEditDialog = () => {
+  if (userInfo.value) {
+    editForm.nickname = userInfo.value.nickname || ''
+    editForm.avatarUrl = userInfo.value.avatarUrl || ''
+    editForm.gender = userInfo.value.gender || 0
+    editForm.bio = userInfo.value.bio || ''
+  }
+  editDialogVisible.value = true
+}
+
+/**
+ * 提交编辑资料
+ */
+const submitEdit = async () => {
+  if (!editForm.nickname?.trim()) {
+    ElMessage.warning('昵称不能为空')
+    return
+  }
+  submitting.value = true
+  try {
+    const res = await request.put('/user/profile', {
+      nickname: editForm.nickname,
+      avatarUrl: editForm.avatarUrl,
+      gender: editForm.gender,
+      bio: editForm.bio
+    })
+    if (res.code === 200) {
+      ElMessage.success('资料更新成功')
+      editDialogVisible.value = false
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        const userObj = JSON.parse(userStr)
+        Object.assign(userObj, editForm)
+        localStorage.setItem('user', JSON.stringify(userObj))
+      }
+      window.location.reload()
+    } else {
+      ElMessage.error(res.message || '更新失败')
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    submitting.value = false
+  }
 }
 
 /**

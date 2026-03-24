@@ -642,3 +642,77 @@
 - **遗留问题/下一步**：后端需支持 `keyword` 参数实现搜索功能
 
 ---
+
+- **日期**：2026-03-23
+- **完成功能**：首页搜索结果展示创作者卡片
+- **核心技术点**：
+  - 添加 `searchUserList = ref([])` 状态存储搜索用户列表
+  - `fetchSearchUsers()` 函数调用 `/user/public/search` 接口
+  - watch 和 onMounted 中调用 `fetchSearchUsers()`
+  - 模板添加用户卡片网格布局，点击跳转个人主页
+  - CSS 样式实现卡片悬浮动效
+- **修改的文件**：`src/views/HomeView.vue`
+- **遗留问题/下一步**：后端需实现 `/user/public/search` 接口
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：账号设置页面（修改密码）
+- **核心技术点**：
+  - 新建 `SettingsView.vue`，左侧 Tab + 右侧修改密码表单
+  - 表单校验：原密码必填、新密码不少于6位、确认密码一致校验
+  - 调用 `/user/password` PUT 接口修改密码
+  - 成功后跳转登录页重新登录
+  - 路由注册到 FrontLayout children
+- **修改的文件**：`src/views/SettingsView.vue`、`src/router/index.js`
+- **遗留问题/下一步**：后端需实现 `/user/password` 接口
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：隐私设置无感自动保存 + 个人资料增加性别/简介字段
+- **核心技术点**：
+  - `privacyForm` 改为 Integer 类型 (0/1)
+  - `fetchProfile()` 页面加载时拉取用户设置
+  - `handlePrivacyChange()` 开关拨动自动调用 PUT `/user/settings` 保存
+  - el-switch 绑定 `:active-value="1" :inactive-value="0"`
+  - UserProfile.vue 表单增加性别 (radio) 和个人简介 (textarea)
+  - 保存时请求体包含 gender 和 bio 字段
+- **修改的文件**：`src/views/SettingsView.vue`、`src/views/UserProfile.vue`
+- **遗留问题/下一步**：后端需实现 `/user/settings` 接口
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：个人主页「编辑资料」弹窗
+- **核心技术点**：
+  - `openEditDialog()` 打开弹窗时回显用户数据
+  - `submitEdit()` 提交 PUT `/user/profile`
+  - 表单包含头像 URL、昵称、性别、个人简介
+  - 成功后更新 localStorage 并刷新页面
+- **修改的文件**：`src/views/UserSpaceView.vue`
+- **遗留问题/下一步**：暂无
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：个人主页编辑资料弹窗头像替换为本地文件上传
+- **核心技术点**：
+  - `uploadHeaders` 携带 Bearer Token
+  - `handleAvatarSuccess` 上传成功回写 `editForm.avatarUrl`
+  - `beforeAvatarUpload` 校验图片类型和 2MB 大小
+  - el-upload 替换原来的 el-input，显示预览头像
+- **修改的文件**：`src/views/UserSpaceView.vue`
+- **遗留问题/下一步**：后端需实现 `/file/upload` 接口
+
+---
+
+- **日期**：2026-03-23
+- **完成功能**：个人主页添加性别徽章显示
+- **核心技术点**：
+  - 昵称旁显示性别标签（男：蓝色，男：红色）
+  - 使用 Male/Female 图标
+- **修改的文件**：`src/views/UserSpaceView.vue`
+- **遗留问题/下一步**：暂无
+
+---

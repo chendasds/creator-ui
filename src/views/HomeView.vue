@@ -20,6 +20,27 @@
             <el-button type="text" @click="$router.push('/')">清除搜索</el-button>
           </div>
 
+          <!-- 搜索用户卡片 -->
+          <div v-if="searchUserList.length > 0" class="search-users-container">
+            <div class="search-users-title">
+              <el-icon><User /></el-icon> 找到相关创作者
+            </div>
+            <div class="search-user-list">
+              <div 
+                v-for="user in searchUserList" 
+                :key="user.id" 
+                class="search-user-card"
+                @click="$router.push(`/user/${user.id}`)"
+              >
+                <el-avatar :size="40" :src="user.avatarUrl">{{ user.nickname?.charAt(0) || user.username?.charAt(0) || 'U' }}</el-avatar>
+                <div class="search-user-info">
+                  <div class="search-user-name">{{ user.nickname || user.username }}</div>
+                </div>
+                <el-button size="small" round>查看主页</el-button>
+              </div>
+            </div>
+          </div>
+
           <el-tabs v-model="activeTab" class="feed-tabs">
             <el-tab-pane label="推荐" name="recommend" />
             <el-tab-pane label="最新发布" name="latest" />
@@ -214,6 +235,9 @@ const activeCategoryId = ref(null)
 // 搜索关键词
 const searchKeyword = ref(null)
 
+// 搜索用户列表
+const searchUserList = ref([])
+
 // 是否为关注流模式
 const isFollowFeed = ref(false)
 
@@ -236,6 +260,24 @@ const fetchUserStats = async () => {
     }
   } catch (error) {
     console.log('获取用户统计数据失败，可能未登录')
+  }
+}
+
+/**
+ * 搜索用户
+ */
+const fetchSearchUsers = async () => {
+  if (!searchKeyword.value) {
+    searchUserList.value = []
+    return
+  }
+  try {
+    const res = await request.get('/user/public/search', { params: { keyword: searchKeyword.value } })
+    if (res.code === 200) {
+      searchUserList.value = res.data || []
+    }
+  } catch (error) {
+    console.error('搜索用户失败:', error)
   }
 }
 
@@ -333,6 +375,9 @@ watch(() => route.query, (newQuery) => {
   searchKeyword.value = newQuery.keyword || null
   if (newQuery.keyword) {
     currentPage.value = 1
+    fetchSearchUsers()
+  } else {
+    searchUserList.value = []
   }
   fetchArticles()
 })
@@ -353,6 +398,7 @@ onMounted(() => {
   // 拦截路由中的 keyword 参数（搜索）
   if (route.query.keyword) {
     searchKeyword.value = route.query.keyword
+    fetchSearchUsers()
   }
   fetchArticles()
   fetchTags()
@@ -679,5 +725,52 @@ const fetchHotCategories = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+/* 搜索用户卡片 */
+.search-users-container {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 8px;
+  border-left: 4px solid #409eff;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+}
+.search-users-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #909399;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.search-user-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.search-user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.search-user-card:hover {
+  background: #ecf5ff;
+  transform: translateY(-2px);
+}
+.search-user-info {
+  flex: 1;
+  min-width: 0;
+}
+.search-user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #303133;
 }
 </style>

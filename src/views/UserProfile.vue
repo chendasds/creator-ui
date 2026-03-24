@@ -32,6 +32,27 @@
           <el-input v-model="form.nickname" placeholder="请输入昵称" maxlength="20" show-word-limit />
         </el-form-item>
 
+        <!-- 性别区 -->
+        <el-form-item label="性别">
+          <el-radio-group v-model="form.gender">
+            <el-radio :label="0">保密</el-radio>
+            <el-radio :label="1">男</el-radio>
+            <el-radio :label="2">女</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <!-- 个人简介区 -->
+        <el-form-item label="个人简介">
+          <el-input
+            v-model="form.bio"
+            type="textarea"
+            :rows="3"
+            placeholder="介绍一下你自己吧（最多500字）"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+
         <!-- 邮箱区 -->
         <el-form-item label="邮箱">
           <el-input v-model="form.email" placeholder="请输入邮箱" />
@@ -53,7 +74,9 @@ import { ElMessage } from 'element-plus'
 const form = ref({
   nickname: '',
   email: '',
-  avatarUrl: ''
+  avatarUrl: '',
+  gender: 0,
+  bio: ''
 })
 
 const avatarUrl = ref('')
@@ -74,6 +97,8 @@ const fetchUserProfile = async () => {
       form.value.nickname = res.data.nickname || ''
       form.value.email = res.data.email || ''
       form.value.avatarUrl = res.data.avatarUrl || ''
+      form.value.gender = res.data.gender || 0
+      form.value.bio = res.data.bio || ''
       avatarUrl.value = res.data.avatarUrl || ''
     }
   } catch (error) {
@@ -126,7 +151,9 @@ const handleSave = async () => {
     const res = await request.put('/user/profile', {
       nickname: form.value.nickname,
       email: form.value.email,
-      avatarUrl: form.value.avatarUrl
+      avatarUrl: form.value.avatarUrl,
+      gender: form.value.gender,
+      bio: form.value.bio
     })
     if (res.code === 200) {
       ElMessage.success('个人资料更新成功！')
