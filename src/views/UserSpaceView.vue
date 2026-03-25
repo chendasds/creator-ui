@@ -46,82 +46,162 @@
         <!-- 文章列表卡片 -->
         <el-card class="article-list-card" shadow="never">
           <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-            <el-tab-pane :label="isMyOwnSpace ? '我的发布' : 'Ta的发布'" name="latest" />
+            <el-tab-pane name="latest">
+              <template #label>{{ isMyOwnSpace ? '我的发布' : 'Ta的发布' }}</template>
+              <div v-if="articleList.length === 0" class="empty-state">
+                <el-empty :description="isMyOwnSpace ? '你还没有发布作品~' : 'Ta还没有发布作品~'" />
+              </div>
+              <div v-else class="article-items">
+                <div
+                  v-for="item in articleList"
+                  :key="item.id"
+                  class="article-item"
+                  @click="$router.push('/artwork/' + item.id)"
+                >
+                  <div class="article-content">
+                    <h3 class="article-title">{{ item.title }}</h3>
+                    <div class="article-meta">
+                      <span class="category-link" @click.stop="$router.push({ path: '/home', query: { categoryId: item.categoryId } })">
+                        {{ item.categoryName || '未分类' }}
+                      </span>
+                      <span class="meta-separator">·</span>
+                      <span class="time">{{ item.createTime ? item.createTime.split('T')[0] : '刚刚' }}</span>
+                    </div>
+                    <p class="article-summary">{{ item.description }}</p>
+                    <div class="article-tags" v-if="item.tags && item.tags.length" style="margin-bottom: 12px; display: flex; gap: 8px;">
+                      <el-tag
+                        v-for="tag in item.tags"
+                        :key="tag.id"
+                        :class="{ 'modern-tag-small': true }"
+                        :style="{ '--hover-color': tag.color || '#409eff' }"
+                        disable-transitions
+                        size="small"
+                      >
+                        {{ tag.name }}
+                      </el-tag>
+                    </div>
+                    <div class="article-footer">
+                      <span class="footer-item">
+                        <el-icon><View /></el-icon>
+                        {{ item.viewCount || 0 }}
+                      </span>
+                      <span class="footer-item">
+                        <el-icon><Document /></el-icon>
+                        {{ item.wordCount || 0 }} 字
+                      </span>
+                      <span class="footer-item">
+                        <el-icon><ChatDotRound /></el-icon>
+                        {{ item.commentCount || 0 }}
+                      </span>
+                      <span class="footer-item">
+                        <el-icon><Pointer /></el-icon>
+                        {{ item.likeCount || 0 }}
+                      </span>
+                    </div>
+                  </div>
+                  <div v-if="item.coverUrl" class="article-cover">
+                    <img :src="item.coverUrl" :alt="item.title" />
+                  </div>
+                </div>
+              </div>
+              <div v-if="articleList.length > 0" class="pagination-wrapper">
+                <el-pagination
+                  background
+                  layout="prev, pager, next, total"
+                  :current-page="currentPage"
+                  :page-size="pageSize"
+                  :total="total"
+                  @current-change="handleCurrentChange"
+                />
+              </div>
+            </el-tab-pane>
 
-            <el-tab-pane :label="isMyOwnSpace ? '我的点赞' : 'Ta的点赞'" name="liked" />
-            <el-tab-pane :label="isMyOwnSpace ? '我的收藏' : 'Ta的收藏'" name="collected" />
+            <el-tab-pane name="liked">
+              <template #label>{{ isMyOwnSpace ? '我赞过的' : 'Ta赞过的' }}</template>
+              <div v-if="likedArtworks.length === 0" class="empty-state" style="padding: 60px 0; text-align: center;">
+                <el-empty :description="isMyOwnSpace ? '你还没有点赞过作品~' : 'Ta还没有点赞过作品~'" />
+              </div>
+              <div v-else class="article-items">
+                <div v-for="item in likedArtworks" :key="item.id" class="article-item" @click="$router.push('/artwork/' + item.id)">
+                  <div class="article-content">
+                    <h3 class="article-title">{{ item.title }}</h3>
+                    <div class="article-meta">
+                      <span class="category-link">{{ item.categoryName || '未分类' }}</span>
+                      <span class="meta-separator">·</span>
+                      <span class="time">{{ item.createTime ? item.createTime.split('T')[0] : '刚刚' }}</span>
+                    </div>
+                    <p class="article-summary">{{ item.description }}</p>
+                    <div class="article-tags" v-if="item.tags && item.tags.length" style="margin-bottom: 12px; display: flex; gap: 8px;">
+                      <el-tag
+                        v-for="tag in item.tags"
+                        :key="tag.id"
+                        :class="{ 'modern-tag-small': true }"
+                        :style="{ '--hover-color': tag.color || '#409eff' }"
+                        disable-transitions
+                        size="small"
+                        @click.stop="handleCardTagClick(tag.id)"
+                      >
+                        {{ tag.name }}
+                      </el-tag>
+                    </div>
+                    <div class="article-footer">
+                      <span class="footer-item"><el-icon><View /></el-icon>{{ item.viewCount || 0 }}</span>
+                      <span class="footer-item"><el-icon><Document /></el-icon>{{ item.wordCount || 0 }} 字</span>
+                      <span class="footer-item"><el-icon><ChatDotRound /></el-icon>{{ item.commentCount || 0 }}</span>
+                      <span class="footer-item"><el-icon><Pointer /></el-icon>{{ item.likeCount || 0 }}</span>
+                    </div>
+                  </div>
+                  <div v-if="item.coverUrl" class="article-cover"><img :src="item.coverUrl" :alt="item.title" /></div>
+                </div>
+              </div>
+            </el-tab-pane>
+
+            <el-tab-pane
+              v-if="isMyOwnSpace || userInfo?.hideCollections !== 1"
+              name="collected"
+            >
+              <template #label>{{ isMyOwnSpace ? '我的收藏' : 'Ta的收藏' }}</template>
+              <div v-if="collectedArtworks.length === 0" class="empty-state" style="padding: 60px 0; text-align: center;">
+                <el-empty :description="isMyOwnSpace ? '你还没有收藏过作品~' : 'Ta还没有收藏过作品~'" />
+              </div>
+              <div v-else class="article-items">
+                <div v-for="item in collectedArtworks" :key="item.id" class="article-item" @click="$router.push('/artwork/' + item.id)">
+                  <div class="article-content">
+                    <h3 class="article-title">{{ item.title }}</h3>
+                    <div class="article-meta">
+                      <span class="category-link">{{ item.categoryName || '未分类' }}</span>
+                      <span class="meta-separator">·</span>
+                      <span class="time">{{ item.createTime ? item.createTime.split('T')[0] : '刚刚' }}</span>
+                    </div>
+                    <p class="article-summary">{{ item.description }}</p>
+                    <div class="article-tags" v-if="item.tags && item.tags.length" style="margin-bottom: 12px; display: flex; gap: 8px;">
+                      <el-tag
+                        v-for="tag in item.tags"
+                        :key="tag.id"
+                        :class="{ 'modern-tag-small': true }"
+                        :style="{ '--hover-color': tag.color || '#409eff' }"
+                        disable-transitions
+                        size="small"
+                        @click.stop="handleCardTagClick(tag.id)"
+                      >
+                        {{ tag.name }}
+                      </el-tag>
+                    </div>
+                    <div class="article-footer">
+                      <span class="footer-item"><el-icon><View /></el-icon>{{ item.viewCount || 0 }}</span>
+                      <span class="footer-item"><el-icon><Document /></el-icon>{{ item.wordCount || 0 }} 字</span>
+                      <span class="footer-item"><el-icon><ChatDotRound /></el-icon>{{ item.commentCount || 0 }}</span>
+                      <span class="footer-item"><el-icon><Pointer /></el-icon>{{ item.likeCount || 0 }}</span>
+                    </div>
+                  </div>
+                  <div v-if="item.coverUrl" class="article-cover"><img :src="item.coverUrl" :alt="item.title" /></div>
+                </div>
+              </div>
+            </el-tab-pane>
+
             <el-tab-pane label="关注列表" name="following" />
             <el-tab-pane label="粉丝列表" name="followers" />
           </el-tabs>
-
-          <div class="article-list">
-            <el-empty v-if="articleList.length === 0" description="Ta还没有发布过创作" />
-
-            <div v-else class="article-items">
-              <div
-                v-for="item in articleList"
-                :key="item.id"
-                class="article-item"
-                @click="$router.push('/artwork/' + item.id)"
-              >
-                <div class="article-content">
-                  <h3 class="article-title">{{ item.title }}</h3>
-                  <div class="article-meta">
-                    <span class="category-link" @click.stop="$router.push({ path: '/home', query: { categoryId: item.categoryId } })">
-                      {{ item.categoryName || '未分类' }}
-                    </span>
-                    <span class="meta-separator">·</span>
-                    <span class="time">{{ item.createTime ? item.createTime.split('T')[0] : '刚刚' }}</span>
-                  </div>
-                  <p class="article-summary">{{ item.description }}</p>
-                  <div class="article-tags" v-if="item.tags && item.tags.length" style="margin-bottom: 12px; display: flex; gap: 8px;">
-                    <el-tag
-                      v-for="tag in item.tags"
-                      :key="tag.id"
-                      class="modern-tag-small"
-                      :style="{ '--hover-color': tag.color || '#409eff' }"
-                      disable-transitions
-                      size="small"
-                    >
-                      {{ tag.name }}
-                    </el-tag>
-                  </div>
-                  <div class="article-footer">
-                    <span class="footer-item">
-                      <el-icon><View /></el-icon>
-                      {{ item.viewCount || 0 }}
-                    </span>
-                    <span class="footer-item">
-                      <el-icon><Document /></el-icon>
-                      {{ item.wordCount || 0 }} 字
-                    </span>
-                    <span class="footer-item">
-                      <el-icon><ChatDotRound /></el-icon>
-                      {{ item.commentCount || 0 }}
-                    </span>
-                    <span class="footer-item">
-                      <el-icon><Pointer /></el-icon>
-                      {{ item.likeCount || 0 }}
-                    </span>
-                  </div>
-                </div>
-                <div v-if="item.coverUrl" class="article-cover">
-                  <img :src="item.coverUrl" :alt="item.title" />
-                </div>
-              </div>
-            </div>
-
-            <div v-if="articleList.length > 0" class="pagination-wrapper">
-              <el-pagination
-                background
-                layout="prev, pager, next, total"
-                :current-page="currentPage"
-                :page-size="pageSize"
-                :total="total"
-                @current-change="handleCurrentChange"
-              />
-            </div>
-          </div>
         </el-card>
       </el-col>
 
@@ -267,6 +347,10 @@ const activeTagId = ref(null)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
+const collectedArtworks = ref([])
+const likedArtworks = ref([])
+const isCollectionHidden = ref(false)
+const loading = ref(false)
 
 // 编辑资料弹窗
 const editDialogVisible = ref(false)
@@ -387,7 +471,18 @@ const fetchTags = async () => {
 const handleTagClick = (id) => {
   activeTagId.value = activeTagId.value === id ? null : id
   currentPage.value = 1
-  fetchArticles(targetUserId.value)
+  if (activeTab.value === 'latest') {
+    fetchArticles(targetUserId.value)
+  } else if (activeTab.value === 'collected') {
+    fetchCollections()
+  } else if (activeTab.value === 'liked') {
+    fetchLikes()
+  }
+}
+
+// 处理卡片内部标签的点击 (与 handleTagClick 逻辑对齐)
+const handleCardTagClick = (tagId) => {
+  handleTagClick(tagId);
 }
 
 /**
@@ -413,9 +508,43 @@ const loadAllData = (id) => {
   checkFollowStatus(id)
 }
 
-const handleTabChange = () => {
+const handleTabChange = (val) => {
   currentPage.value = 1
-  loadAllData(targetUserId.value)
+  if (val === 'latest') {
+    fetchArticles(targetUserId.value)
+  } else if (val === 'collected') {
+    fetchCollections()
+  } else if (val === 'liked') {
+    fetchLikes()
+  }
+}
+
+const fetchCollections = async () => {
+  loading.value = true
+  try {
+    const res = await request.get(`/interaction/collections/${targetUserId.value}`, { params: { tagId: activeTagId.value } })
+    if (res.code === 200) {
+      collectedArtworks.value = res.data || []
+    }
+  } catch (error) {
+    console.error('获取收藏列表失败', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const fetchLikes = async () => {
+  loading.value = true
+  try {
+    const res = await request.get(`/interaction/likes/${targetUserId.value}`, { params: { tagId: activeTagId.value } })
+    if (res.code === 200) {
+      likedArtworks.value = res.data || []
+    }
+  } catch (error) {
+    console.error('获取点赞列表失败', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleCurrentChange = (val) => {
@@ -802,5 +931,12 @@ watch(() => route.params.id, (newId) => {
   color: var(--hover-color) !important;
   background-color: #e8eaec !important;
   transform: translateY(-1px);
+}
+
+/* 新增：选中标签的常亮状态：背景色和边框色使用标签自身的专属色 */
+.modern-tag.is-active {
+  background-color: var(--hover-color) !important;
+  color: #ffffff !important;
+  border-color: var(--hover-color) !important;
 }
 </style>

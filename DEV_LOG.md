@@ -716,3 +716,26 @@
 - **遗留问题/下一步**：暂无
 
 ---
+
+- **日期**：2026-03-23
+- **完成功能**：点赞列表/收藏列表 Tab 数据拉取与渲染
+- **核心技术点**：
+  - 新增 `likedArtworks` 响应式数组存储点赞作品
+  - 新增 `fetchLikes()` 调用 `/interaction/likes/${targetUserId}` 接口
+  - 新增 `loading` 变量控制加载状态
+  - `handleTabChange` 根据 Tab 类型分发请求（latest/collected/liked）
+  - 点赞/收藏列表复用 `article-item` 样式渲染
+  - 点赞/收藏列表添加 `category-link`、`meta-separator`、`article-footer` 等完整元信息
+  - 点赞/收藏列表添加标签（Tags）展示
+  - `fetchCollections`/`fetchLikes` 请求添加 `tagId` 参数支持标签筛选
+  - `handleTagClick` 根据当前 Tab 重新拉取对应数据
+  - 新增 `handleCardTagClick` 处理卡片内部标签点击，使用 `.stop` 防止冒泡触发卡片点击
+  - 右侧标签添加 `is-active` 动态类绑定，选中时高亮显示
+  - CSS 新增 `.modern-tag.is-active` 常亮状态样式（使用标签自身 --hover-color）
+  - 移除 `.modern-tag-small.is-active`（卡片内小标签不参与常亮联动）
+  - 点赞/收藏列表 article-footer 添加评论数和点赞数显示
+- **修改的文件**：`src/views/UserSpaceView.vue`
+- **遗留问题/下一步**：
+  - 关注列表/粉丝列表接口待对接
+
+---
