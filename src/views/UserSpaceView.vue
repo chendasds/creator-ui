@@ -31,14 +31,18 @@
               >
                 编辑资料
               </el-button>
-              <el-button 
-                v-else 
-                :type="isFollowing ? 'default' : 'primary'" 
-                :plain="!isFollowing" 
-                @click="handleToggleFollow"
-              >
-                {{ isFollowing ? '已关注' : '+ 关注' }}
-              </el-button>
+              <template v-else>
+                <el-button 
+                  :type="isFollowing ? 'default' : 'primary'" 
+                  :plain="!isFollowing" 
+                  @click="handleToggleFollow"
+                >
+                  {{ isFollowing ? '已关注' : '+ 关注' }}
+                </el-button>
+                <el-button @click="$router.push(`/chat?targetId=${targetUserId}`)">
+                  发私信
+                </el-button>
+              </template>
             </div>
           </div>
         </el-card>
@@ -199,8 +203,43 @@
               </div>
             </el-tab-pane>
 
-            <el-tab-pane label="关注列表" name="following" />
-            <el-tab-pane label="粉丝列表" name="followers" />
+            <el-tab-pane label="关注列表" name="following">
+              <div v-if="followingList.length === 0" class="empty-state" style="padding: 60px 0; text-align: center;">
+                <el-empty :description="isMyOwnSpace ? '你还没有关注任何人~' : 'Ta还没有关注任何人~'" />
+              </div>
+              <div v-else class="user-list">
+                <div v-for="user in followingList" :key="user.id" class="user-card" @click="goToUserSpace(user.id)">
+                  <el-avatar :size="50" :src="user.avatarUrl">{{ user.nickname?.charAt(0) || user.username?.charAt(0) || 'U' }}</el-avatar>
+                  <div class="user-info">
+                    <div class="user-name-wrapper">
+                      <span class="user-name">{{ user.nickname || user.username }}</span>
+                      <el-icon v-if="user.gender === 1" class="gender-icon male"><Male /></el-icon>
+                      <el-icon v-if="user.gender === 2" class="gender-icon female"><Female /></el-icon>
+                    </div>
+                    <div class="user-bio">{{ user.bio || '这个人很懒，暂时没有写简介...' }}</div>
+                  </div>
+                </div>
+              </div>
+            </el-tab-pane>
+
+            <el-tab-pane label="粉丝列表" name="followers">
+              <div v-if="followerList.length === 0" class="empty-state" style="padding: 60px 0; text-align: center;">
+                <el-empty :description="isMyOwnSpace ? '你还没有粉丝~' : 'Ta还没有粉丝~'" />
+              </div>
+              <div v-else class="user-list">
+                <div v-for="user in followerList" :key="user.id" class="user-card" @click="goToUserSpace(user.id)">
+                  <el-avatar :size="50" :src="user.avatarUrl">{{ user.nickname?.charAt(0) || user.username?.charAt(0) || 'U' }}</el-avatar>
+                  <div class="user-info">
+                    <div class="user-name-wrapper">
+                      <span class="user-name">{{ user.nickname || user.username }}</span>
+                      <el-icon v-if="user.gender === 1" class="gender-icon male"><Male /></el-icon>
+                      <el-icon v-if="user.gender === 2" class="gender-icon female"><Female /></el-icon>
+                    </div>
+                    <div class="user-bio">{{ user.bio || '这个人很懒，暂时没有写简介...' }}</div>
+                  </div>
+                </div>
+              </div>
+            </el-tab-pane>
           </el-tabs>
         </el-card>
       </el-col>
@@ -342,13 +381,15 @@ const publicUserStats = ref({
 })
 const articleList = ref([])
 const tagList = ref([])
-const activeTab = ref('latest')
+const activeTab = ref(route.query.tab || 'latest')
 const activeTagId = ref(null)
-const currentPage = ref(1)
+const currentPage = ref(Number(route.query.page) || 1)
 const pageSize = ref(10)
 const total = ref(0)
 const collectedArtworks = ref([])
 const likedArtworks = ref([])
+const followingList = ref([])
+const followerList = ref([])
 const isCollectionHidden = ref(false)
 const loading = ref(false)
 
@@ -504,11 +545,26 @@ const loadAllData = (id) => {
   if (!id) return
   fetchUserInfo(id)
   fetchUserStats(id)
-  fetchArticles(id)
   checkFollowStatus(id)
+
+  // 核心修复：根据当前高亮的 Tab 拉取对应数据，而不是死板地只拉取发布列表
+  if (activeTab.value === 'latest') {
+    fetchArticles(id)
+  } else if (activeTab.value === 'collected') {
+    fetchCollections()
+  } else if (activeTab.value === 'liked') {
+    fetchLikes()
+  } else if (activeTab.value === 'following') {
+    fetchFollowings()
+  } else if (activeTab.value === 'followers') {
+    fetchFollowers()
+  }
 }
 
 const handleTabChange = (val) => {
+  // 将当前 Tab 状态无痕同步到浏览器的 URL 中，不产生多余的历史记录
+  router.replace({ query: { ...route.query, tab: val, page: 1 } })
+
   currentPage.value = 1
   if (val === 'latest') {
     fetchArticles(targetUserId.value)
@@ -516,6 +572,10 @@ const handleTabChange = (val) => {
     fetchCollections()
   } else if (val === 'liked') {
     fetchLikes()
+  } else if (val === 'following') {
+    fetchFollowings()
+  } else if (val === 'followers') {
+    fetchFollowers()
   }
 }
 
@@ -547,7 +607,42 @@ const fetchLikes = async () => {
   }
 }
 
+const fetchFollowings = async () => {
+  loading.value = true
+  try {
+    const res = await request.get(`/follow/following/${targetUserId.value}`)
+    if (res.code === 200) {
+      followingList.value = res.data || []
+    }
+  } catch (error) {
+    console.error('获取关注列表失败', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const fetchFollowers = async () => {
+  loading.value = true
+  try {
+    const res = await request.get(`/follow/followers/${targetUserId.value}`)
+    if (res.code === 200) {
+      followerList.value = res.data || []
+    }
+  } catch (error) {
+    console.error('获取粉丝列表失败', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 点击卡片跳转到该用户的个人主页
+const goToUserSpace = (id) => {
+  const basePath = route.path.substring(0, route.path.lastIndexOf('/'))
+  router.push(`${basePath}/${id}`)
+}
+
 const handleCurrentChange = (val) => {
+  router.replace({ query: { ...route.query, page: val } })
   currentPage.value = val
   fetchArticles(targetUserId.value)
 }
@@ -640,6 +735,7 @@ onMounted(() => {
     }
   }
   targetUserId.value = route.params.id
+  currentPage.value = Number(route.query.page) || 1
   loadAllData(targetUserId.value)
   fetchTags()
 })
@@ -648,9 +744,17 @@ onMounted(() => {
 watch(() => route.params.id, (newId) => {
   if (newId) {
     targetUserId.value = newId
-    currentPage.value = 1
+    currentPage.value = Number(route.query.page) || 1
     loadAllData(newId)
   }
+})
+
+// 监听 URL query 参数变化，保持状态同步
+watch(() => route.query, (newQuery) => {
+  if (newQuery.tab) {
+    activeTab.value = newQuery.tab
+  }
+  currentPage.value = Number(newQuery.page) || 1
 })
 </script>
 
@@ -938,5 +1042,56 @@ watch(() => route.params.id, (newId) => {
   background-color: var(--hover-color) !important;
   color: #ffffff !important;
   border-color: var(--hover-color) !important;
+}
+
+/* 用户列表卡片样式 */
+.user-list {
+  display: flex;
+  flex-direction: column;
+}
+.user-card {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f2f5;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.user-card:hover {
+  background-color: #fafafa;
+}
+.user-card:last-child {
+  border-bottom: none;
+}
+.user-info {
+  margin-left: 16px;
+  flex: 1;
+  min-width: 0;
+}
+.user-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+.user-bio {
+  font-size: 13px;
+  color: #909399;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gender-icon.male {
+  color: #409eff;
+  font-size: 14px;
+}
+.gender-icon.female {
+  color: #f56c6c;
+  font-size: 14px;
 }
 </style>

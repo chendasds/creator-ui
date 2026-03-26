@@ -107,7 +107,7 @@
         <!-- 操作按钮 -->
         <el-form-item class="form-actions">
           <el-button @click="router.push('/')">取消</el-button>
-          <el-button @click="handleSubmit(0)">保存草稿</el-button>
+          <el-button @click="handleSaveDraft">保存草稿</el-button>
           <el-button type="primary" :loading="submitting" @click="handleSubmit(1)">
             发布文章
           </el-button>
@@ -118,8 +118,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, shallowRef, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, shallowRef, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
@@ -127,6 +127,7 @@ import '@wangeditor/editor/dist/css/style.css'
 import request from '@/api/request'
 
 const router = useRouter()
+const route = useRoute()
 const formRef = ref(null)
 const submitting = ref(false)
 const editorRef = shallowRef(null)
@@ -245,9 +246,77 @@ const handleEditorCreated = (editor) => {
   editorRef.value = editor
 }
 
-onMounted(() => {
-  fetchTags()
+onMounted(async () => {
+  await fetchTags()
+
+  const draftId = route.query.draftId
+  if (draftId) {
+    loadDraftDetail(draftId)
+  }
+
+  const artworkId = route.query.id
+  if (artworkId) {
+    setTimeout(() => {
+      loadArtworkDetail(artworkId)
+    }, 300)
+  }
 })
+
+const loadArtworkDetail = async (id) => {
+  try {
+    const res = await request.get(`/artwork/${id}`)
+    const rawData = res.data || res
+    const art = rawData.artwork || rawData
+    
+    if (art) {
+      form.title = art.title || ''
+      form.categoryId = art.categoryId || null
+      form.coverUrl = art.coverUrl || ''
+      form.description = art.description || ''
+      if (rawData.tags) form.tagIds = rawData.tags.map(t => t.id)
+
+      await nextTick()
+      
+      const contentHtml = art.content || ''
+      
+      if (editorRef.value) {
+        try {
+          if (editorRef.value.getHtml() !== contentHtml) {
+            setTimeout(() => {
+              if (editorRef.value) {
+                editorRef.value.setHtml(contentHtml)
+              }
+            }, 0)
+          }
+        } catch (slateErr) {
+          console.warn('wangEditor 内部节点同步微调:', slateErr)
+        }
+      } else {
+        form.content = contentHtml
+      }
+      
+      ElMessage.success('数据回显成功')
+    }
+  } catch (error) {
+    console.error('回填失败:', error)
+  }
+}
+
+const loadDraftDetail = async (id) => {
+  try {
+    const res = await request.get(`/draft/${id}`)
+    if (res.code === 200 && res.data) {
+      const draft = res.data
+      form.title = draft.title || ''
+      form.content = draft.content || ''
+      form.description = draft.description || ''
+      form.categoryId = draft.categoryId || null
+    }
+  } catch (error) {
+    console.error('获取草稿详情失败', error)
+    ElMessage.error('草稿数据读取失败')
+  }
+}
 
 const handleEditorChange = (editor) => {
   form.content = editor.getHtml()
@@ -266,6 +335,42 @@ const handleCoverError = () => {
   form.coverUrl = ''
 }
 
+// 保存草稿（独立草稿表）
+const handleSaveDraft = async () => {
+  if (!form.title) {
+    ElMessage.warning('草稿至少需要填写一个标题哦！')
+    return
+  }
+  
+  const userStr = localStorage.getItem('user')
+  if (!userStr) {
+    ElMessage.error('请先登录')
+    return
+  }
+  const user = JSON.parse(userStr)
+
+  const draftData = {
+    id: route.query.draftId || null, 
+    userId: user.id,
+    title: form.title,
+    content: form.content,
+    description: form.description,
+    categoryId: form.categoryId
+  }
+
+  try {
+    const res = await request.post('/draft/save', draftData)
+    if (res.code === 200) {
+      ElMessage.success('草稿保存成功！')
+      router.push('/creator/drafts')
+    } else {
+      ElMessage.error(res.message || '保存失败')
+    }
+  } catch (error) {
+    console.error('保存草稿失败', error)
+  }
+}
+
 // 提交表单
 const handleSubmit = async (status) => {
   if (!formRef.value) return
@@ -274,7 +379,7 @@ const handleSubmit = async (status) => {
     if (!valid) return
 
     // 富文本内容校验
-    const plainText = form.content.replace(/<[^>]+>/g, '').trim()
+    const plainText = (form.content || '').replace(/<[^>]+>/g, '').trim()
     if (!plainText) {
       ElMessage.error('请输入文章正文内容')
       return
@@ -282,17 +387,29 @@ const handleSubmit = async (status) => {
 
     submitting.value = true
     try {
-      const res = await request.post('/artwork/publish', {
+      const isEdit = !!route.query.id
+      const submitData = {
         title: form.title,
         categoryId: form.categoryId,
         tagIds: form.tagIds,
         coverUrl: form.coverUrl,
         description: form.description || plainText.slice(0, 200),
-        content: form.content,
-        status
-      })
+        content: form.content
+      }
+
+      const res = isEdit
+        ? await request.put(`/artwork/update?id=${route.query.id}`, submitData)
+        : await request.post('/artwork/publish', submitData)
 
       if (res.code === 200 || res.success === true) {
+        const draftId = route.query.draftId
+        if (draftId) {
+          try {
+            await request.delete(`/draft/${draftId}`)
+          } catch (e) {
+            console.error('清理已发布的草稿失败', e)
+          }
+        }
         ElMessage.success(status === 1 ? '文章发布成功' : '草稿保存成功')
         router.push('/')
       } else {

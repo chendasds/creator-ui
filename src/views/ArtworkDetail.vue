@@ -29,6 +29,16 @@
         <span>全篇约 {{ artwork.wordCount || 0 }} 字，预计阅读 {{ Math.ceil((artwork.wordCount || 0) / 400) || 1 }} 分钟</span>
       </div>
 
+      <!-- 作者权限操作按钮 -->
+      <div v-if="isAuthor" class="author-actions" style="margin-top: 15px;">
+        <el-button type="primary" plain @click="router.push(`/publish?id=${artwork.id}`)">
+          <el-icon><Edit /></el-icon> 编辑作品
+        </el-button>
+        <el-button type="danger" plain @click="handleDeleteArtwork">
+          <el-icon><Delete /></el-icon> 删除作品
+        </el-button>
+      </div>
+
       <!-- 标签云 -->
       <div class="detail-tags" v-if="artwork.tags && artwork.tags.length" style="margin-bottom: 25px; display: flex; gap: 8px;">
         <el-tag
@@ -196,10 +206,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { User, Collection, Clock, View, Document, Pointer, Star, ChatDotRound } from '@element-plus/icons-vue'
+import { User, Collection, Clock, View, Document, Pointer, Star, ChatDotRound, Edit, Delete } from '@element-plus/icons-vue'
 import request from '@/api/request'
 
 const route = useRoute()
@@ -229,12 +239,31 @@ const collectCount = ref(0)
 const comments = ref([])
 const totalComments = ref(0)
 const commentContent = ref('')
-const replyingTo = ref(null)  // 当前回复的目标评论ID
+const replyingTo = ref(null)
 const replyContent = ref('')
 
-// 获取当前登录用户 ID
-const userStr = localStorage.getItem('user')
-const currentUserId = userStr ? JSON.parse(userStr).id : null
+const currentUserId = ref(null)
+const isAuthor = computed(() => {
+  return currentUserId.value && artwork.value && currentUserId.value === artwork.value.userId
+})
+
+const handleDeleteArtwork = () => {
+  ElMessageBox.confirm('确定要永久删除这部作品吗？删除后不可恢复！', '高危操作', {
+    confirmButtonText: '确定删除',
+    cancelButtonText: '取消',
+    type: 'error'
+  }).then(async () => {
+    try {
+      const res = await request.delete(`/artwork/${artwork.value.id}`)
+      if (res.code === 200) {
+        ElMessage.success('作品已删除')
+        router.replace(`/user/${currentUserId.value}`)
+      }
+    } catch (e) {
+      console.error('删除失败', e)
+    }
+  }).catch(() => {})
+}
 
 /**
  * 点赞/收藏切换
@@ -466,6 +495,9 @@ const goToHomeWithTag = (tagId) => {
 }
 
 onMounted(() => {
+  const userStr = localStorage.getItem('user')
+  if (userStr) currentUserId.value = JSON.parse(userStr).id
+
   fetchDetail()
   fetchComments()
 })

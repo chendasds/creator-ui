@@ -68,7 +68,7 @@
                     <span class="meta-separator">·</span>
                     <span 
                       class="category-link" 
-                      @click.stop="$router.push({ path: '/', query: { categoryId: item.categoryId } })"
+                      @click.stop="$router.push({ path: '/', query: { ...route.query, categoryId: item.categoryId } })"
                     >
                       {{ item.categoryName || '未分类' }}
                     </span>
@@ -195,7 +195,7 @@
               :class="{ 'is-active': activeCategoryId === category.id }"
               style="--hover-color: #409eff;"
               disable-transitions
-              @click="$router.push({ path: '/', query: { categoryId: category.id } })"
+              @click="$router.push({ path: '/', query: { ...route.query, categoryId: category.id } })"
             >
               {{ category.name }}
             </el-tag>
@@ -208,15 +208,16 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { View, Document, ChatDotRound, Pointer, User, Edit, Collection, Grid } from '@element-plus/icons-vue'
 import request from '@/api/request'
 
 const route = useRoute()
+const router = useRouter()
 
-const activeTab = ref('recommend')
-const currentPage = ref(1)
+const activeTab = ref(route.query.tab || 'recommend')
+const currentPage = ref(Number(route.query.page) || 1)
 const pageSize = ref(10)
 const total = ref(0)
 
@@ -227,10 +228,10 @@ const articleList = ref([])
 const tagList = ref([])
 
 // 当前选中的标签 ID
-const activeTagId = ref(null)
+const activeTagId = ref(route.query.tagId ? Number(route.query.tagId) : null)
 
 // 当前选中的分类 ID
-const activeCategoryId = ref(null)
+const activeCategoryId = ref(route.query.categoryId ? Number(route.query.categoryId) : null)
 
 // 搜索关键词
 const searchKeyword = ref(null)
@@ -311,14 +312,16 @@ const fetchArticles = async () => {
 }
 
 /**
- * 监听 Tab 切换，重新获取数据
+ * 监听 Tab 切换，重新获取数据并同步 URL
  */
-watch(activeTab, () => {
+watch(activeTab, (newVal) => {
+  router.replace({ query: { ...route.query, tab: newVal, page: 1 } })
   currentPage.value = 1
   fetchArticles()
 })
 
 const handleCurrentChange = (val) => {
+  router.replace({ query: { ...route.query, page: val } })
   currentPage.value = val
   fetchArticles()
 }
@@ -328,14 +331,17 @@ const handleWrite = () => {
 }
 
 const handleTagClick = (id) => {
-  activeTagId.value = activeTagId.value === id ? null : id
+  const newTagId = activeTagId.value === id ? null : id
+  activeTagId.value = newTagId
   currentPage.value = 1
+  router.replace({ query: { ...route.query, tagId: newTagId || undefined, page: 1 } })
   fetchArticles()
 }
 
 const clearCategory = () => {
   activeCategoryId.value = null
   currentPage.value = 1
+  router.replace({ query: { ...route.query, categoryId: undefined, page: 1 } })
   fetchArticles()
 }
 
@@ -369,8 +375,10 @@ const formatDate = (dateStr) => {
 
 // 监听路由参数的变化（解决同组件跳转不刷新的问题）
 watch(() => route.query, (newQuery) => {
+  activeTab.value = newQuery.tab || 'recommend'
   activeCategoryId.value = newQuery.categoryId ? Number(newQuery.categoryId) : null
   activeTagId.value = newQuery.tagId ? Number(newQuery.tagId) : null
+  currentPage.value = Number(newQuery.page) || 1
   isFollowFeed.value = newQuery.feedType === 'follow'
   searchKeyword.value = newQuery.keyword || null
   if (newQuery.keyword) {
@@ -383,6 +391,10 @@ watch(() => route.query, (newQuery) => {
 })
 
 onMounted(() => {
+  // 拦截路由中的 tab 参数
+  if (route.query.tab) {
+    activeTab.value = route.query.tab
+  }
   // 拦截路由中的 categoryId 参数
   if (route.query.categoryId) {
     activeCategoryId.value = Number(route.query.categoryId)

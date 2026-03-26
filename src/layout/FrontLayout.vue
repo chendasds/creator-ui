@@ -29,12 +29,16 @@
 
         <div class="header-right">
           <div class="header-actions">
-            <el-badge is-dot class="action-item">
-              <span class="action-text" @click="handleNavClick('message')">消息</span>
-            </el-badge>
-            <el-badge :value="3" :max="99" class="action-item">
-              <span class="action-text" @click="handleNavClick('chat')">私信</span>
-            </el-badge>
+            <div class="header-action-item" @click="handleNavClick('message')">
+              <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99">
+                <el-icon :size="22" color="#606266"><Bell /></el-icon>
+              </el-badge>
+            </div>
+            <div class="header-action-item" @click="$router.push('/chat')" title="私信大厅">
+              <el-badge :value="chatUnreadCount" :hidden="chatUnreadCount === 0" :max="99">
+                <el-icon :size="22" color="#606266"><ChatDotRound /></el-icon>
+              </el-badge>
+            </div>
           </div>
           <el-button type="primary" round @click="handleWrite">
             创作分享
@@ -79,14 +83,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowDown, Search, User, Setting, SwitchButton } from '@element-plus/icons-vue'
+import { ArrowDown, Search, User, Setting, SwitchButton, Bell, ChatDotRound } from '@element-plus/icons-vue'
+import request from '@/api/request'
 
 const router = useRouter()
 const userInfo = ref(null)
 const searchText = ref('')
+const unreadCount = ref(0)
+const chatUnreadCount = ref(0)
+
+const fetchUnreadCount = async () => {
+  const userStr = localStorage.getItem('user')
+  if (userStr) {
+    const user = JSON.parse(userStr)
+    try {
+      const res = await request.get(`/notification/unreadCount/${user.id}`)
+      if (res.code === 200) {
+        unreadCount.value = res.data || 0
+      }
+    } catch (e) {
+      console.error('获取未读消息数失败', e)
+    }
+  }
+}
+
+const fetchChatUnreadCount = async () => {
+  const userStr = localStorage.getItem('user')
+  if (userStr) {
+    const user = JSON.parse(userStr)
+    try {
+      const res = await request.get(`/chat/unreadCount/${user.id}`)
+      if (res.code === 200) {
+        chatUnreadCount.value = res.data || 0
+      }
+    } catch (e) {
+      console.error('获取私信未读数失败', e)
+    }
+  }
+}
 
 const handleSearch = () => {
   if (!searchText.value.trim()) return
@@ -107,7 +144,7 @@ const handleNavClick = (type) => {
       router.push('/category')
       break
     case 'message':
-      ElMessage.info('消息功能开发中')
+      router.push('/message')
       break
     case 'chat':
       ElMessage.info('私信功能开发中')
@@ -156,6 +193,16 @@ onMounted(() => {
       console.error('解析用户信息失败:', e)
     }
   }
+  fetchUnreadCount()
+  fetchChatUnreadCount()
+  window.addEventListener('unread-cleared', () => { unreadCount.value = 0 })
+  window.addEventListener('chat-read', fetchChatUnreadCount)
+  window.addEventListener('update-notification-count', fetchUnreadCount)
+})
+onUnmounted(() => {
+  window.removeEventListener('unread-cleared', () => { unreadCount.value = 0 })
+  window.removeEventListener('chat-read', fetchChatUnreadCount)
+  window.removeEventListener('update-notification-count', fetchUnreadCount)
 })
 </script>
 

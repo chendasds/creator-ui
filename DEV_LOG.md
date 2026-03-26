@@ -734,8 +734,140 @@
   - CSS 新增 `.modern-tag.is-active` 常亮状态样式（使用标签自身 --hover-color）
   - 移除 `.modern-tag-small.is-active`（卡片内小标签不参与常亮联动）
   - 点赞/收藏列表 article-footer 添加评论数和点赞数显示
+  - 新增 `followingList`/`followerList` 响应式数组存储关注/粉丝数据
+  - 新增 `fetchFollowings()` 调用 `/follow/following/${targetUserId}` 接口
+  - 新增 `fetchFollowers()` 调用 `/follow/followers/${targetUserId}` 接口
+  - 新增 `goToUserSpace()` 方法实现用户卡片跳转
+  - `handleTabChange` 补充 following/followers Tab 切换处理
+  - 关注/粉丝列表渲染用户卡片，含头像、昵称、性别图标、个人简介
+  - CSS 新增 `.user-list`、`.user-card`、`.user-info` 等用户列表相关样式
+  - `loadAllData` 修复：根据当前激活的 Tab 动态拉取对应数据，解决切换用户主页时数据未同步刷新的 Bug
+  - `activeTab` 从 URL query 参数读取，解决详情页返回时 Tab 状态丢失问题
+  - `handleTabChange` 添加 `router.replace` 将 Tab 状态同步到 URL
 - **修改的文件**：`src/views/UserSpaceView.vue`
+- **HomeView.vue SPA 状态 URL 化改造**：
+  - `activeTab` 改为从 URL query 参数读取，默认为 `'recommend'`
+  - `activeTagId` 改为从 URL query 参数读取
+  - `activeCategoryId` 改为从 URL query 参数读取
+  - `watch(activeTab)` 添加 `router.replace` 将 Tab 切换同步到 URL
+  - `handleTagClick` 添加 `router.replace` 将标签筛选同步到 URL
+  - `clearCategory` 添加 `router.replace` 将清除分类操作同步到 URL
+  - 侧边栏分类标签点击保留其他 URL 参数
+  - 文章卡片分类链接点击保留其他 URL 参数
+  - `watch(route.query)` 补充 `activeTab` 同步，解决后退时 Tab 高亮丢失问题
+- **全局分页状态 URL 同步改造**：
+  - `HomeView.vue`：`currentPage` 从 URL query 参数读取，`handleCurrentChange` 同步页码到 URL，`handleTagClick`/`clearCategory`/`watch(activeTab)` 切换筛选条件时重置 page 为 1，`watch(route.query)` 同步 page 参数
+  - `UserSpaceView.vue`：`currentPage` 从 URL query 参数读取，`handleCurrentChange` 同步页码到 URL，`handleTabChange` 切换 Tab 时重置 page 为 1，`onMounted`/`watch(route.params.id)`/`watch(route.query)` 同步 page 参数
+  - `CategoryView.vue`：无分页逻辑，无需修改
+- **消息中心功能开发**：
+  - 新建 `src/views/MessageView.vue`：消息通知页面，支持点赞、收藏、评论、关注、系统通知等消息展示
+  - 更新 `src/router/index.js`：注册消息中心路由
+  - 更新 `src/layout/FrontLayout.vue`：将"消息"改为小铃铛图标，带未读消息红点 Badge
+  - `fetchUnreadCount` 方法获取未读消息数量
+  - `window.addEventListener('unread-cleared')` 监听消息页面全部已读事件
+  - `MessageView.vue` 样式升级：`.notification-item` 改为卡片化设计，增加边框、圆角、悬浮上浮和阴影效果
+  - `MessageView.vue` 交互升级：卡片添加 `cursor: pointer`，新增 `handleItemClick` 方法实现全局点击跳转，`@click.stop` 阻止头像和用户名的事件冒泡
+- **私信聊天功能开发**：
+  - 新建 `src/views/ChatView.vue`：私信大厅页面，包含左侧联系人列表、右侧聊天窗口、自动滚动到底部、3 秒轮询刷新逻辑
+  - 更新 `src/router/index.js`：注册 `/chat` 路由
+  - 更新 `src/layout/FrontLayout.vue`：导航栏添加私信图标入口（`ChatDotRound`），替换原有的"私信"文字
+  - 更新 `src/views/UserSpaceView.vue`：在关注按钮旁添加"发私信"按钮
+- **私信红点 Badge 与事件联动**：
+  - `FrontLayout.vue` 新增 `chatUnreadCount` 变量和 `fetchChatUnreadCount` 方法
+  - `onMounted` 新增 `fetchChatUnreadCount()` 初始化和 `chat-read` 事件监听
+  - 私信图标外套 `el-badge` 显示未读数量
+  - `ChatView.vue` 的 `fetchHistory` 成功后 `window.dispatchEvent(new Event('chat-read'))` 触发全局事件
+- **创作者中心布局开发**：
+  - 新建 `src/views/creator/CreatorLayout.vue`：`el-aside` 左侧边栏 + `el-main` 右侧内容区，支持路由切换动画
+  - 新建 `src/views/creator/Drafts.vue`：草稿箱占位页面
+  - 更新 `src/router/index.js`：重构路由，将 `/publish` 移入 `/creator/publish`，新增 `/creator/drafts`
+  - 更新 `FrontLayout.vue`：`handleWrite` 方法跳转路径改为 `/creator/publish`
+- **创作者中心重构为数据看板首页**：
+  - 新建 `src/views/creator/Dashboard.vue`：数据看板骨架页面，含阅读量/点赞/粉丝/作品数统计卡片
+  - 更新 `src/views/creator/CreatorLayout.vue`：侧边栏菜单改为「数据看板」和「草稿箱」，移除「发布作品」
+  - 更新 `src/router/index.js`：`redirect` 改为 `/creator/dashboard`，新增 dashboard 子路由，Publish 路由移至 FrontLayout 下作为一级路由
+  - 更新 `FrontLayout.vue`：`handleWrite` 跳转改为 `/publish`
+- **数据看板对接真实数据**：
+  - `src/views/creator/Dashboard.vue`：新增 `fetchStats` 方法请求 `/artwork/dashboard/stats/{userId}`，模板绑定 `stats` 响应式数据，`v-loading` 加载状态
+- **数据看板 ECharts 折线图**：
+  - `src/views/creator/Dashboard.vue`：`el-empty` 替换为 `<div ref="chartRef">` 图表容器，引入 `echarts`，新增 `initChart` / `fetchTrend` / `handleResize` 方法，`onMounted` 调用 `fetchTrend()` 并监听窗口 resize，`onBeforeUnmount` 销毁图表实例
+- **草稿箱对接真实接口**：
+  - `src/views/creator/Drafts.vue`：从零重写，模板展示草稿列表卡片，`fetchDrafts` 请求 `/draft/list/{userId}`，`handleDelete` 请求 `DELETE /draft/{id}`，`handleEdit` 跳转 `/publish?draftId={id}`
+  - `src/views/Publish.vue`：引入 `useRoute`，新增 `handleSaveDraft` 方法请求 `POST /draft/save`，按钮 `@click="handleSaveDraft"` 绑定；`draftId` 支持更新老草稿
+- **作品详情页作者权限操作**：
+  - `src/views/ArtworkDetail.vue`：新增 `computed` 引入，新增 `currentUserId`（从 `localStorage` 读取）和 `isAuthor` 计算属性，引入 `Edit`/`Delete` 图标，新增 `handleDeleteArtwork` 方法请求 `DELETE /artwork/{id}`，成功后 `router.replace` 回个人主页
+  - 模板 `<meta-info>` 区域下方新增 `v-if="isAuthor"` 权限按钮组（编辑作品/删除作品），编辑按钮跳转 `/publish?id={artwork.id}`
+- **发布页支持编辑已发布作品**：
+  - `src/views/Publish.vue`：`onMounted` 新增 `route.query.id` 判断，满足条件调用 `loadArtworkDetail(id)` 回显正式作品数据；`loadArtworkDetail` 请求 `GET /artwork/{id}` 并回填 title/content/description/categoryId/coverUrl
+  - `handleSubmit` 改为根据 `route.query.id` 区分新增（`POST /artwork/add`）和更新（`PUT /artwork/update`）
 - **遗留问题/下一步**：
-  - 关注列表/粉丝列表接口待对接
+  - 用户列表头像支持点击访问其个人主页
 
 ---
+
+- **日期**：2026-03-26
+- **完成功能**：后台管理用户管理模块
+- **核心技术点**：
+  - 新建 `src/views/user/User.vue`，包含搜索、分页、权限切换和禁用功能
+  - `/admin/user` 路由挂载到 `Layout.vue` 管理后台
+  - 表格列：ID、头像、用户名、昵称、邮箱、后台权限（el-switch）、账号状态（el-tag）、操作按钮
+  - `el-switch` 直接绑定 `row.role`，切换时调用 `PUT /user/admin/update` 更新权限
+  - 禁用/启用操作使用 `ElMessageBox.confirm` 二次确认
+  - `handleUpdateUser` 失败时自动重刷数据回滚状态
+- **修改的文件**：`src/views/user/User.vue`（新建）、`src/router/index.js`、`src/layout/Layout.vue`
+- **遗留问题/下一步**：后端需实现 `/user/admin/page` 和 `/user/admin/update` 接口
+
+---
+
+- **日期**：2026-03-26
+- **完成功能**：用户管理页面分页切换修复
+- **核心技术点**：
+  - `@size-change` 和 `@current-change` 直接绑定 `loadData`，避免 `handleQuery` 强制重置页码到 1
+  - 搜索按钮保持绑定 `handleQuery`，确保点击搜索时从第 1 页展示
+- **修改的文件**：`src/views/user/User.vue`
+
+---
+
+- **日期**：2026-03-26
+- **完成功能**：后台管理全站公告推送功能
+- **核心技术点**：
+  - 新建 `src/views/admin/Announcement.vue`
+  - el-alert 警告提示谨慎操作
+  - el-input textarea 限制 500 字
+  - `ElMessageBox.confirm` 二次确认后 POST `/notification/broadcast` 推送
+- **修改的文件**：`src/views/admin/Announcement.vue`（新建）、`src/router/index.js`、`src/layout/Layout.vue`
+- **遗留问题/下一步**：后端需实现 `/notification/broadcast` 接口
+
+---
+
+- **日期**：2026-03-26
+- **完成功能**：消息中心增加单条删除功能
+- **核心技术点**：
+  - 引入 Delete 图标
+  - 卡片 hover 时显示删除按钮，position: absolute 定位在右下角
+  - `handleDelete(id)` 调用 DELETE `/notification/{id}` 删除后刷新列表
+  - 未读红点位置调整到右上角
+- **修改的文件**：`src/views/MessageView.vue`
+- **遗留问题/下一步**：无
+
+- **日期**：2026-03-26
+- **完成功能**：用户管理页面增加全量编辑功能
+- **核心技术点**：
+  - 操作列新增「编辑资料」按钮
+  - 新增 `el-dialog` 编辑对话框，包含：昵称、邮箱、手机号、性别（0-保密/1-男/2-女）、个人简介、角色（1-普通/2-管理）、状态（1-正常/0-禁用）
+  - `handleEdit(row)` 深拷贝行数据到编辑表单
+  - `submitEdit()` 调用 `PUT /user/admin/update` 保存修改
+- **修改的文件**：`src/views/user/User.vue`
+- **遗留问题/下一步**：无
+
+---
+
+- **日期**：2026-03-26
+- **完成功能**：消息删除后同步更新导航栏未读数
+- **核心技术点**：
+  - FrontLayout.vue 增加 `update-notification-count` 事件监听器
+  - onUnmounted 中移除监听防止内存泄漏
+  - MessageView.vue 删除成功后 dispatch 该事件
+  - 实现前后端未读数实时同步
+- **修改的文件**：`src/layout/FrontLayout.vue`、`src/views/MessageView.vue`
+- **遗留问题/下一步**：无

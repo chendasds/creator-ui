@@ -15,6 +15,12 @@
         <el-menu-item index="/admin/artwork">
           <span>作品管理</span>
         </el-menu-item>
+        <el-menu-item index="/admin/user">
+          <span>用户管理</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/announcement">
+          <span>全站公告</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>

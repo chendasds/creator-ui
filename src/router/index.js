@@ -23,12 +23,12 @@ const router = createRouter({
           component: () => import('../views/ArtworkDetail.vue')
         },
         {
-          path: '/publish',
-          component: () => import('../views/Publish.vue')
+          path: '/user/:id',
+          component: () => import('../views/UserSpaceView.vue')
         },
         {
-          path: '/profile',
-          component: () => import('../views/UserProfile.vue')
+          path: '/category',
+          component: () => import('../views/CategoryView.vue')
         },
         {
           path: '/settings',
@@ -36,12 +36,43 @@ const router = createRouter({
           component: () => import('../views/SettingsView.vue')
         },
         {
-          path: '/user/:id',
-          component: () => import('../views/UserSpaceView.vue')
+          path: '/creator',
+          name: 'Creator',
+          component: () => import('../views/creator/CreatorLayout.vue'),
+          redirect: '/creator/dashboard',
+          meta: { title: '创作者中心' },
+          children: [
+            {
+              path: 'dashboard',
+              name: 'CreatorDashboard',
+              component: () => import('../views/creator/Dashboard.vue'),
+              meta: { title: '数据看板' }
+            },
+            {
+              path: 'drafts',
+              name: 'CreatorDrafts',
+              component: () => import('../views/creator/Drafts.vue'),
+              meta: { title: '草稿箱' }
+            }
+          ]
         },
         {
-          path: '/category',
-          component: () => import('../views/CategoryView.vue')
+          path: '/publish',
+          name: 'Publish',
+          component: () => import('../views/Publish.vue'),
+          meta: { title: '发布作品' }
+        },
+        {
+          path: '/message',
+          name: 'Message',
+          component: () => import('../views/MessageView.vue'),
+          meta: { title: '消息中心' }
+        },
+        {
+          path: '/chat',
+          name: 'Chat',
+          component: () => import('../views/ChatView.vue'),
+          meta: { title: '私信大厅' }
         }
       ]
     },
@@ -61,6 +92,16 @@ const router = createRouter({
         {
           path: '/admin/artwork',
           component: () => import('../views/artwork/Artwork.vue')
+        },
+        {
+          path: '/admin/user',
+          name: 'AdminUser',
+          component: () => import('../views/user/User.vue'),
+          meta: { title: '用户管理' }
+        },
+        {
+          path: '/admin/announcement',
+          component: () => import('../views/admin/Announcement.vue')
         }
       ]
     }
