@@ -21,6 +21,12 @@
         <el-menu-item index="/admin/announcement">
           <span>全站公告</span>
         </el-menu-item>
+        <el-menu-item index="/admin/tag">
+          <span>标签管理</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/comment">
+          <span>评论管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>
@@ -30,6 +36,10 @@
         </div>
         <div class="header-right">
           <span class="username">欢迎, {{ userInfo?.username || '用户' }}</span>
+          
+          <el-button type="primary" size="small" plain @click="router.push('/')">
+            返回前台
+          </el-button>
           <el-button type="danger" size="small" @click="handleLogout">
             退出登录
           </el-button>

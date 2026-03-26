@@ -102,28 +102,60 @@ const router = createRouter({
         {
           path: '/admin/announcement',
           component: () => import('../views/admin/Announcement.vue')
+        },
+        {
+          path: '/admin/tag',
+          component: () => import('../views/admin/Tag.vue')
+        },
+        {
+          path: '/admin/comment',
+          component: () => import('../views/admin/Comment.vue')
         }
       ]
     }
   ]
 })
 
-// 全局前置路由守卫：强制登录
+// 全局前置路由守卫：强制登录与权限拦截
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
+  const userStr = localStorage.getItem('user')
 
   // 定义免登录白名单页面
   const publicPages = ['/login']
   const authRequired = !publicPages.includes(to.path)
 
+  // 1. 基础登录拦截
   if (authRequired && !token) {
     ElMessage.warning('请先登录系统')
     return next('/login')
   }
 
-  // 已登录用户访问登录页时，跳转到首页
+  // 2. 已登录用户访问登录页时，跳转到首页
   if (token && to.path === '/login') {
     return next('/home')
+  }
+
+  // 3. 管理员后台越权拦截
+  // 如果目标路径是后台（以 /admin 开头），需要检查角色是否为 2（管理员）
+  if (to.path.startsWith('/admin')) {
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr)
+        // 如果 role 不是 2，说明是普通用户企图越权
+        if (user.role !== 2) {
+          ElMessage.error('越权访问：您不是管理员，无法进入后台')
+          return next('/home') // 将其踢回前台首页
+        }
+      } catch (e) {
+        // 防止 JSON 解析错误
+        console.error('用户信息解析失败', e)
+        return next('/login')
+      }
+    } else {
+      // 没拿到用户信息，也踢出去
+      return next('/login')
+    }
   }
 
   next()

@@ -871,3 +871,15 @@
   - 实现前后端未读数实时同步
 - **修改的文件**：`src/layout/FrontLayout.vue`、`src/views/MessageView.vue`
 - **遗留问题/下一步**：无
+
+---
+
+- **日期**：2026-03-26
+- **完成功能**：后台路由越权拦截 / 评论管理页面 / 标签管理页面 / 返回前台按钮
+- **核心技术点**：
+  - `router.beforeEach` 增加管理员权限检查（role !== 2 拦截并踢回前台首页）
+  - Layout.vue header-right 添加「返回前台」按钮
+  - 新增 `src/views/admin/Comment.vue` 评论管理页面
+  - 新增 `src/views/admin/Tag.vue` 标签管理页面
+- **修改的文件**：`src/router/index.js`、`src/layout/Layout.vue`
+- **遗留问题/下一步**：无
