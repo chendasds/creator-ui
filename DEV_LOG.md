@@ -875,11 +875,17 @@
 ---
 
 - **日期**：2026-03-26
-- **完成功能**：后台路由越权拦截 / 评论管理页面 / 标签管理页面 / 返回前台按钮
+- **完成功能**：后台路由越权拦截 / 评论管理页面 / 标签管理页面 / 返回前台按钮 / 通知接口去用户ID冗余参数 / 后台表格 Loading 死锁问题修复 / 富文本 XSS 注入漏洞修复
 - **核心技术点**：
   - `router.beforeEach` 增加管理员权限检查（role !== 2 拦截并踢回前台首页）
   - Layout.vue header-right 添加「返回前台」按钮
   - 新增 `src/views/admin/Comment.vue` 评论管理页面
   - 新增 `src/views/admin/Tag.vue` 标签管理页面
-- **修改的文件**：`src/router/index.js`、`src/layout/Layout.vue`
+  - 通知类接口（list/readAll/unreadCount）移除路径参数，改用 Token 自动鉴权
+  - 后台所有表格 loadData 方法统一加固：catch 中加 `ElMessage.error` + finally 中绝对关闭 `loading`
+  - **ArtworkDetail.vue 富文本 XSS 修复**：引入 `DOMPurify` 库，`v-html` 渲染改为 `sanitizedContent` 计算属性，白名单仅保留安全标签和属性
+  - **Publish.vue 编辑回显硬编码延迟修复**：移除 `setTimeout(..., 300)` 和 `setTimeout(..., 0)`，改用 `watch(editorRef, ...)` 监听编辑器就绪 + `await nextTick()` 确保 DOM 更新后安全赋值
+  - **Publish.vue 分类数据动态化**：移除硬编码分类数组，改用 `loadCategories()` 从 `/category/list` 接口动态获取，模板绑定不变
+- **修改的文件**：`src/router/index.js`、`src/layout/Layout.vue`、`src/layout/FrontLayout.vue`、`src/views/MessageView.vue`、`src/views/admin/Comment.vue`、`src/views/admin/Tag.vue`、`src/views/category/Category.vue`、`src/views/artwork/Artwork.vue`、`src/views/user/User.vue`、`src/views/ArtworkDetail.vue`、`src/views/Publish.vue`
+- **新增依赖**：`dompurify`
 - **遗留问题/下一步**：无

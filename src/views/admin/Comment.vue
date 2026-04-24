@@ -70,6 +70,9 @@ const loadData = async () => {
       tableData.value = res.data.records
       total.value = res.data.total
     }
+  } catch (error) {
+    console.error('获取评论列表失败:', error)
+    ElMessage.error('数据加载失败，请稍后重试')
   } finally {
     loading.value = false
   }

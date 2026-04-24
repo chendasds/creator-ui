@@ -150,9 +150,12 @@ const loadData = async () => {
     if (res.code === 200) {
       userList.value = res.data.records
       total.value = res.data.total
+    } else {
+      ElMessage.error(res.message || '加载数据失败')
     }
   } catch (error) {
-    console.error('加载用户列表失败', error)
+    console.error('加载用户列表失败:', error)
+    ElMessage.error('数据加载失败，请稍后重试')
   } finally {
     loading.value = false
   }

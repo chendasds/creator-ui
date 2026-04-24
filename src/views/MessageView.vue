@@ -112,7 +112,7 @@ const fetchNotifications = async () => {
   if (!currentUserId.value) return
   loading.value = true
   try {
-    const res = await request.get(`/notification/list/${currentUserId.value}`)
+    const res = await request.get('/notification/list')
     if (res.code === 200) {
       notificationList.value = res.data || []
     }
@@ -125,7 +125,7 @@ const fetchNotifications = async () => {
 
 const handleReadAll = async () => {
   try {
-    const res = await request.put(`/notification/readAll/${currentUserId.value}`)
+    const res = await request.put('/notification/readAll')
     if (res.code === 200) {
       ElMessage.success('已全部标记为已读')
       fetchNotifications()

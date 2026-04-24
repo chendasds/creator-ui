@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, shallowRef, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, reactive, shallowRef, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
@@ -132,13 +132,19 @@ const formRef = ref(null)
 const submitting = ref(false)
 const editorRef = shallowRef(null)
 
-// 分类选项（与后端数据库对应）
-const categories = ref([
-  { id: 1, name: '文学创作' },
-  { id: 2, name: '技术文档' },
-  { id: 3, name: '生活随笔' },
-  { id: 4, name: '学习笔记' }
-])
+// 分类列表（从后端动态获取）
+const categories = ref([])
+
+const loadCategories = async () => {
+  try {
+    const res = await request.get('/category/list')
+    if (res.code === 200) {
+      categories.value = res.data
+    }
+  } catch (error) {
+    console.error('获取分类列表失败:', error)
+  }
+}
 
 // 标签列表（真实 API）
 const tagList = ref([])
@@ -246,20 +252,25 @@ const handleEditorCreated = (editor) => {
   editorRef.value = editor
 }
 
+// 监听编辑器就绪后，再加载文章详情（彻底移除 setTimeout 硬编码延迟）
+watch(editorRef, (editor) => {
+  if (editor) {
+    const artworkId = route.query.id
+    if (artworkId) {
+      loadArtworkDetail(artworkId)
+    }
+  }
+})
+
 onMounted(async () => {
-  await fetchTags()
+  await Promise.all([fetchTags(), loadCategories()])
 
   const draftId = route.query.draftId
   if (draftId) {
     loadDraftDetail(draftId)
   }
 
-  const artworkId = route.query.id
-  if (artworkId) {
-    setTimeout(() => {
-      loadArtworkDetail(artworkId)
-    }, 300)
-  }
+  // 如果没有 articleId，无需等待编辑器，loadArtworkDetail 不会触发
 })
 
 const loadArtworkDetail = async (id) => {
@@ -276,18 +287,13 @@ const loadArtworkDetail = async (id) => {
       if (rawData.tags) form.tagIds = rawData.tags.map(t => t.id)
 
       await nextTick()
-      
+
       const contentHtml = art.content || ''
-      
+
       if (editorRef.value) {
         try {
-          if (editorRef.value.getHtml() !== contentHtml) {
-            setTimeout(() => {
-              if (editorRef.value) {
-                editorRef.value.setHtml(contentHtml)
-              }
-            }, 0)
-          }
+          await nextTick()
+          editorRef.value.setHtml(contentHtml)
         } catch (slateErr) {
           console.warn('wangEditor 内部节点同步微调:', slateErr)
         }

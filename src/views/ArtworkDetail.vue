@@ -56,7 +56,7 @@
       <el-divider />
 
       <!-- 正文内容 -->
-      <div class="article-content" v-html="artwork.content"></div>
+      <div class="article-content" v-html="sanitizedContent"></div>
 
       <!-- 互动操作区 -->
       <div class="action-bar">
@@ -211,6 +211,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { User, Collection, Clock, View, Document, Pointer, Star, ChatDotRound, Edit, Delete } from '@element-plus/icons-vue'
 import request from '@/api/request'
+import DOMPurify from 'dompurify'
 
 const route = useRoute()
 const router = useRouter()
@@ -228,6 +229,15 @@ const artwork = ref({
   wordCount: 0,
   coverUrl: '',
   content: ''
+})
+
+// XSS 防御：过滤富文本内容
+const sanitizedContent = computed(() => {
+  if (!artwork.value || !artwork.value.content) return ''
+  return DOMPurify.sanitize(artwork.value.content, {
+    ALLOWED_TAGS: ['p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'code', 'pre', 'blockquote', 'ul', 'ol', 'li', 'a', 'strong', 'em', 'u', 's', 'span', 'div'],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'style', 'target']
+  })
 })
 
 const isLiked = ref(false)

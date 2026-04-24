@@ -122,6 +122,7 @@ const loadData = async () => {
     }
   } catch (error) {
     console.error('获取作品列表失败:', error)
+    ElMessage.error('数据加载失败，请稍后重试')
   } finally {
     loading.value = false
   }

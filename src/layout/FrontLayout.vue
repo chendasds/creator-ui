@@ -100,7 +100,7 @@ const fetchUnreadCount = async () => {
   if (userStr) {
     const user = JSON.parse(userStr)
     try {
-      const res = await request.get(`/notification/unreadCount/${user.id}`)
+      const res = await request.get('/notification/unreadCount')
       if (res.code === 200) {
         unreadCount.value = res.data || 0
       }
